@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if ls *.o 1> /dev/null 2>&1; then
+   rm *.o;
+fi
+
+if ls src/*.o 1> /dev/null 2>&1; then
+   rm src/*.o
+fi
+
+if [ -f a.out ]
+   then rm a.out
+fi
+
+if [ -f vdisk ]
+   then rm vdisk
+fi     
+
+if [ -f run ]
+   then rm run
+fi  

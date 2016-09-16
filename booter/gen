@@ -1,0 +1,49 @@
+#!/bin/bash
+
+cp ../vdisk vdisk
+
+echo -n Compiling...
+as86 -o src/bs.o src/bs.s
+if ! [ "$?" = 0 ]; then
+    echo Error compiling assembly.
+    exit
+fi
+
+bcc -c -ansi src/type.h src/ext2.h src/bc.c src/io.c
+if ! [ "$?" = 0 ]; then
+    echo Error compiling C source code.
+    exit
+fi
+echo Done.
+
+echo -n Loading...
+ld86 -d -o src/a.out src/bs.o src/bc.o src/io.o /usr/lib/bcc/libc.a
+if ! [ "$?" = 0 ]; then
+    echo Error loading object code.
+    exit
+fi
+echo Done.
+
+echo -n Creating virtual disk...
+dd if=src/a.out of=vdisk bs=16 count=27 conv=notrunc
+if ! [ "$?" = 0 ]; then
+    echo Error duplicating data {1}.
+    exit
+fi
+dd if=src/a.out of=vdisk bs=512 seek=1  conv=notrunc
+if ! [ "$?" = 0 ]; then
+    echo Error duplicating data {2}.
+    exit
+fi
+echo Done.
+
+echo "#!/bin/bash" >> run
+echo qemu-system-i386 -hda vdisk >> run
+chmod +x run
+
+if ! [ -z "$1" ]; then
+    exit
+fi
+
+rm src/*.o
+rm src/a.out

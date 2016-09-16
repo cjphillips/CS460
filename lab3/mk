@@ -1,0 +1,26 @@
+cp ../clean/FDimage FDimage
+
+VFD=FDimage
+MyLib=../lib/4.5/mtx4.5
+out=bin
+
+mkdir -p bin
+
+as86 -o $out/main.s.o src/main.s
+bcc  -c -ansi -o $out/main.o src/main.c
+ld86 -d -o bin/mtx $out/main.s.o $MyLib $out/main.o kcw/mtxlib /usr/lib/bcc/libc.a
+
+echo mount $VFD on /mnt
+
+mount -o loop $VFD /mnt
+
+rm /mnt/boot/*
+
+cp bin/mtx /mnt/boot
+umount /mnt
+
+echo
+echo Press any key to launch.
+read dummy
+
+qemu-system-i386 -fda FDimage -no-fd-bootchk
