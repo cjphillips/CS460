@@ -1,0 +1,20 @@
+cp clean/mtximage bin/mtximage
+
+VFD=../../bin/mtximage
+MtxLib=../../lib/mtxlib
+
+
+mount -o loop $VFD /mnt
+rm /mnt/bin/*
+umount /mnt
+
+echo Making $1 ...
+bcc -c -ansi $1.c
+as86 -o user.o user.s
+ld86 -o $1 user.o $1.o $MtxLib /usr/lib/bcc/libc.a
+
+mount -o loop $VFD /mnt
+cp $1 /mnt/bin/$1
+umount /mnt
+
+rm *.o $1

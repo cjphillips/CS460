@@ -1,0 +1,19 @@
+VFD=bin/mtximage
+LIB=lib/mtxlib
+BCCLIB=/usr/lib/bcc/libc.a
+
+echo Making system binaries ...
+
+as86 -o bin/ts.o src/ts.s
+bcc -c -ansi -o bin/sys.o src/sys.c
+
+ld -d -o bin/mtx bin/ts.o bin/sys.o $LIB $BCCLIB
+
+mount -o loop $VFD /mnt
+cp bin/mtx /mnt/boot
+umount /mnt
+#rm bin/*.o bin/mtx
+
+(cd src/user; mku umain);
+
+echo Done.

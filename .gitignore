@@ -1,3 +1,5 @@
+*~
+
 [Bb]in/*
 360
 
@@ -15,3 +17,6 @@ lab3/src/update
 lab3/kcw/*
 
 *.o
+
+lab4/bin/*
+lab4/kcw/*
