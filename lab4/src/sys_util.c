@@ -1,3 +1,5 @@
+#include "include/type.h"
+
 int get_word(u16 segment, u16 offset)
 {
   u16 word;
@@ -8,10 +10,30 @@ int get_word(u16 segment, u16 offset)
   return word;
 }
 
-put_word(u16 word, u16 segment, u16 offset)
+void put_word(u16 word, u16 segment, u16 offset)
 {
   setds(segment);
   *(u16 *)offset = word;
 
   setds(0x1000);
+}
+
+void do_kfork()
+{
+  printf("FORKING\n");
+}
+
+void do_tswitch()
+{
+  printf("SWITCHING\n");
+}
+
+void do_wait()
+{
+  printf("WAITING\n");
+}
+
+void do_exit()
+{
+  printf("EXITING\n");
 }

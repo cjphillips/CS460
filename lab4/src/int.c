@@ -5,40 +5,11 @@
 ----------------------------------------------------------------------------
 ***************************************************************************/
 
-#ifndef NPROC
-#define NPROC 9
-#endif
-
-
-/* SYSTEM CALL HANDLER IN C CODE */
-int kcinth()
-{
-  int a, b, c, d, r;
-  u16 segment, offset;
-
-  segment = running->uss;
-  offset = running->usp;
-
-  a = get_word(segment, offset + 26);
-  b = get_word(segment, offset + 28);
-  c = get_word(segment, offset + 30);
-  d = get_word(segment, offset + 32);
-
-  switch(a)
-  {
-    case 0: r = kgetpid();   break;
-    case 1: r = kps();       break;
-    case 2: r = kchname(b);  break;
-    case 3: r = kfork();     break;
-    case 4: r = kswitch();   break;
-    case 5: r = kwait(b);    break;
-    case 6: r = kexit(b);    break;
-    default: printf("[%d]: Invalid syscall.\n", a); break;
-  }
-
-  /* Place the return value into the ax register at offset (8 * 2) */
-  put_word(r, segment, offset + 16);
-}
+#include "include/type.h"
+#include "include/util.h"
+/*#include "include/wait.h"*/
+/*#include "include/kernel.h"*/
+#include "include/int.h"
 
 int kgetpid()
 {
@@ -69,4 +40,59 @@ int kps()
   }
 
   printf("%s\n", p->name);
+}
+
+int kchname(char *name)
+{
+  return -1;
+}
+
+int kkfork()
+{
+  return -1;
+}
+
+int ktswitch()
+{
+  return tswitch();
+}
+
+int kkwait(int *status)
+{
+  return -1;
+}
+
+int kkexit(int exitValue)
+{
+  return -1;
+}
+
+/* SYSTEM CALL HANDLER IN C CODE */
+int kcinth()
+{
+  int a, b, c, d, r;
+  u16 segment, offset;
+
+  segment = running->uss;
+  offset = running->usp;
+
+  a = get_word(segment, offset + 26);
+  b = get_word(segment, offset + 28);
+  c = get_word(segment, offset + 30);
+  d = get_word(segment, offset + 32);
+
+  switch(a)
+  {
+    case 0: r = kgetpid();   break;
+    case 1: r = kps();       break;
+    case 2: r = kchname(b);  break;
+    case 3: r = kkfork();     break;
+    case 4: r = ktswitch();   break;
+    case 5: r = kkwait(&b);    break;
+    case 6: r = kkexit(b);    break;
+    default: printf("[%d]: Invalid syscall.\n", a); break;
+  }
+
+  /* Place the return value into the ax register at offset (8 * 2) */
+  put_word(r, segment, offset + 16);
 }

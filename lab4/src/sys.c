@@ -1,22 +1,5 @@
 #include "include/type.h"
-
-PROC proc[NPROC], *running, *freeList, *readyQueue, *sleepList;
-int procSisze = sizeof(PROC);
-int nproc = 0;
-
-int body();
-
-char *pname[] = {
-  "Sun", "Mercury", "Venus", "Earth",  "Mars", "Jupiter",
-  "Saturn", "Uranus", "Neptune"
-};
-
-int color;
-
-#include "sys_util.c"
-//#include "wait.c"
-//#include "kernel.c"
-#include "int.c"
+#include "include/queue.h"
 
 int init()
 {
@@ -73,9 +56,44 @@ int set_vector(u16 vector, u16 handler)
   put_word(0x1000, 0, (vector << 2) + 2);
 }
 
+int body()
+{
+    char c;
+
+    if (rflag)
+    {
+      printf("Process [%d]: Rescheduled.\n", running->pid);
+      rflag = 0;
+      tswitch();
+    }
+    printf("Running Process: %d [ppid:%d]\n", running->pid, running->ppid);
+
+    printf("---------------------------------------------------------------\n");
+    printList("Free List   :", freeList);
+    printQueue("Ready Queue :", readyQueue);
+    printSleep();
+    printf("---------------------------------------------------------------\n\n");
+
+    do
+    {
+       printf("[s|f|w|q]: ");
+       c = getc();
+       printf("%c\n", c);
+
+       switch (c)
+       {
+         case 'f': do_kfork();   break;
+         case 's': do_tswitch(); break;
+         case 'w': do_wait();    break;
+         case 'q': do_exit();    break;
+         default: printf("Unrecognized input.\n\n"); break;
+       }
+    } while(1);
+}
+
 main()
 {
-  printf("MTX starting in main()\n\n");
+  printf("\n\nWelcome! Starting in MTX kernel.\n\n");
   init();
   set_vector(80, int80h);
 

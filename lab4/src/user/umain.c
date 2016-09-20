@@ -1,11 +1,12 @@
-#include "utility.c"
+#include "include/user.h"
+#include "include/util.h"
 
 int color;
-int (*fptr[ ])() = {(int (*)()) ps, chname, kfork, switch, wait, exit };
+int (*fptr[ ])() = {ps, chname, kfork, kswitch, wait, exit };
 
 main()
 {
-  char name[NAME_SIZE];
+  char name[NAMESIZE];
   int pid;
 
   while(1)
@@ -27,6 +28,6 @@ main()
       continue;
     }
     cmd = find_cmd(name);
-    fptr[cmd]();
-  }*/
+    fptr[cmd]();*/
+  }
 }

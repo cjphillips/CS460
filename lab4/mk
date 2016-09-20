@@ -1,19 +1,25 @@
-VFD=bin/mtximage
+VFD=bin/FDimage
 LIB=lib/mtxlib
 BCCLIB=/usr/lib/bcc/libc.a
 
+cp clean/FDimage bin/FDimage
+
 echo Making system binaries ...
 
-as86 -o bin/ts.o src/ts.s
-bcc -c -ansi -o bin/sys.o src/sys.c
+as86 -o bin/sys_asm.o src/sys_asm.s
+bcc -c -ansi src/*.c
 
-ld -d -o bin/mtx bin/ts.o bin/sys.o $LIB $BCCLIB
+mv src/*.o bin
+
+ld86 -d -o bin/mtx bin/sys_asm.o bin/*.o $LIB $BCCLIB
 
 mount -o loop $VFD /mnt
 cp bin/mtx /mnt/boot
 umount /mnt
-#rm bin/*.o bin/mtx
 
 (cd src/user; mku umain);
+
+echo qemu-system-i386 -fda $VFD -no-fd-bootchk >> q
+chmod +x q
 
 echo Done.

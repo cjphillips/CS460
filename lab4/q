@@ -1,0 +1,1 @@
+qemu-system-i386 -fda bin/FDimage -no-fd-bootchk

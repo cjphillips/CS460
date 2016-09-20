@@ -1,13 +1,11 @@
-#define NAME_SIZE 64
+#include "include/user.h"
 
-char *cmds[] = {
-  "ps", "chname", "kfork", "switch", "wait", "exit"
-};
+char *cmds[] = { "ps", "chname", "kfork", "switch", "wait", "exit" };
 
 int show_menu()
 {
   printf("////////////////////////---Menu---/////\n");
-  printf(" ps, chname, kfork, switch, wait, exit \n")
+  printf(" ps, chname, kfork, switch, wait, exit \n");
   printf("///////////////////////////////////////\n");
 }
 
@@ -37,7 +35,7 @@ int ps()
 
 int chname()
 {
-  char s[NAME_SIZE];
+  char s[NAMESIZE];
 
   printf("New name: ");
   gets(s);
