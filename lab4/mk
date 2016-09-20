@@ -13,9 +13,9 @@ mv src/*.o bin
 
 ld86 -d -o bin/mtx bin/sys_asm.o bin/*.o $LIB $BCCLIB
 
-mount -o loop $VFD /mnt
-cp bin/mtx /mnt/boot
-umount /mnt
+sudo mount -o loop $VFD /mnt
+sudo cp bin/mtx /mnt/boot
+sudo umount /mnt
 
 (cd src/user; mku umain);
 

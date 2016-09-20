@@ -56,41 +56,6 @@ int set_vector(u16 vector, u16 handler)
   put_word(0x1000, 0, (vector << 2) + 2);
 }
 
-int body()
-{
-    char c;
-
-    if (rflag)
-    {
-      printf("Process [%d]: Rescheduled.\n", running->pid);
-      rflag = 0;
-      tswitch();
-    }
-    printf("Running Process: %d [ppid:%d]\n", running->pid, running->ppid);
-
-    printf("---------------------------------------------------------------\n");
-    printList("Free List   :", freeList);
-    printQueue("Ready Queue :", readyQueue);
-    printSleep();
-    printf("---------------------------------------------------------------\n\n");
-
-    do
-    {
-       printf("[s|f|w|q]: ");
-       c = getc();
-       printf("%c\n", c);
-
-       switch (c)
-       {
-         case 'f': do_kfork();   break;
-         case 's': do_tswitch(); break;
-         case 'w': do_wait();    break;
-         case 'q': do_exit();    break;
-         default: printf("Unrecognized input.\n\n"); break;
-       }
-    } while(1);
-}
-
 main()
 {
   printf("\n\nWelcome! Starting in MTX kernel.\n\n");
@@ -101,7 +66,7 @@ main()
 
   while (1)
   {
-    printf("[P0 running]\n");
+    printf("[P%d running]\n", running->pid);
     while(!readyQueue)
     {
       printf("[Switching process away from P0]\n");

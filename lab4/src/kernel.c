@@ -1,21 +1,52 @@
 #include "include/type.h"
 #include "include/queue.h"
 
-extern int body();
+#define NUMREG 13
 
-void set_registers(u16 segment)
+int body()
+{
+    char c;
+    printf("Running Process: %d [ppid:%d]\n", running->pid, running->ppid);
+
+    printf("---------------------------------------------------------------\n");
+    printList("Free List   :", freeList);
+    printQueue("Ready Queue :", readyQueue);
+    printSleep();
+    printf("---------------------------------------------------------------\n\n");
+
+    do
+    {
+       printf("[s|f|w|q]: ");
+       c = getc();
+       printf("%c\n", c);
+
+       switch (c)
+       {
+         case 'f': do_kfork();   break;
+         case 's': do_tswitch(); break;
+         case 'w': do_wait();    break;
+         case 'q': do_exit();    break;
+         default: printf("Unrecognized input.\n\n"); break;
+       }
+    } while(1);
+}
+
+void set_registers(u16 segment, u16 offset)
 {
   int i;
 
   /*put_word(segment, segment, running->ksp + -2);*/
   /*put_word(segment, segment, running->ksp + -4);*/
-  put_word(segment, segment, -2); // DS
-  put_word(segment, segment, -2); // ES
-  for(i = 0; i < 8; i++)
+  //put_word(segment, segment, segment-2); // DS
+  //put_word(segment, segment, segment-2); // ES
+  for(i = 0; i < NUMREG; i++)
   {
+    put_word(0, segment, i*-22);
     /* DI, SI, BP, DX, CX, BX, AX, PC=VA(0) */
-    put_word(0, segment, (i + 3) * -2);
+    //put_word(0, segment, (i + 3) * segment-2);
   }
+  put_word(segment, segment, -2); // DS
+  put_word(segment, segment, -4); // ES
   put_word(segment, segment, -22); // CS
   put_word(0x0020, segment, -24);  // flag
 }
@@ -42,7 +73,7 @@ PROC *kfork(char *filename)
   nproc++;
 
   /* Initialize the new proc's stack: */
-  for (i = 0; i < 12; i++)
+  for (i = 0; i < 10; i++)
   {
     p->kstack[SSIZE - i] = 0;
   }

@@ -2,17 +2,17 @@ VFD=../../bin/FDimage
 MtxLib=../../lib/mtxlib
 BccLib=/usr/lib/bcc/libc.a
 
-mount -o loop $VFD /mnt
-rm /mnt/bin/*
-umount /mnt
+sudo mount -o loop $VFD /mnt
+sudo rm /mnt/bin/*
+sudo umount /mnt
 
 echo Making $1 ...
 bcc -c -ansi $1.c utility.c
 as86 -o user.o user.s
 ld86 -o $1 user.o $1.o utility.o $MtxLib $BccLib
 
-mount -o loop $VFD /mnt
-cp $1 /mnt/bin/$1
-umount /mnt
+sudo mount -o loop $VFD /mnt
+sudo cp $1 /mnt/bin/$1
+sudo umount /mnt
 
 rm *.o $1

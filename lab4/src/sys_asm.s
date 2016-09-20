@@ -1,9 +1,9 @@
         MTXSEG  = 0x1000
-	
+
        .globl _main,_running,_scheduler
        .globl _proc, _procSize
        .globl _tswitch
-	
+
         jmpi   start,MTXSEG
 
 start:	mov  ax,cs
@@ -12,27 +12,35 @@ start:	mov  ax,cs
         mov  es,ax
 	mov  sp,#_proc
 	add  sp,_procSize
-		
+
 	call _main
 
 _tswitch:
-SAVE:	
-	push ax
-	push bx
-	push cx
-	push dx
-	push bp
-	push si
-	push di
+SAVE:
+	push  ax
+	push  bx
+	push  cx
+	push  dx
+	push  bp
+	push  si
+	push  di
 	pushf
-	mov  bx,_running
-	mov  2[bx],sp
 
-FIND:	call _scheduler
+        !push  ds
+        !push  ss
+
+	mov   bx,_running
+	mov   2[bx],sp
+
+FIND:	call  _scheduler
 
 RESUME:
 	mov  bx,_running
 	mov  sp,2[bx]
+
+        !pop  ss
+        !pop  ds
+
 	popf
 	pop  di
 	pop  si
@@ -44,7 +52,7 @@ RESUME:
 
 	ret
 
-	
+
 ! added functions for KUMODE
 	.globl _int80h,_goUmode,_kcinth
 !These offsets are defined in struct proc
@@ -71,7 +79,7 @@ _int80h:
         mov USP[bx],sp          ! save uSP  in proc.USP
 
 ! Change ES,SS to kernel segment
-        mov  ax,ds              ! stupid !!        
+        mov  ax,ds              ! stupid !!
         mov  es,ax              ! CS=DS=SS=ES in Kmode
         mov  ss,ax
 
@@ -81,14 +89,14 @@ _int80h:
 
         call  _kcinth
         jmp   _goUmode
-  
+
 _goUmode:
         cli
 	mov bx,_running 	! bx -> proc
         mov ax,USS[bx]
         mov ss,ax               ! restore uSS
         mov sp,USP[bx]          ! restore uSP
-  
+
 	pop ds
 	pop es
 	pop di
@@ -97,8 +105,6 @@ _goUmode:
         pop dx
         pop cx
         pop bx
-        pop ax                  ! NOTE: contains return value to Umode     
-	
-        iret
+        pop ax                  ! NOTE: contains return value to Umode
 
-	
+        iret
