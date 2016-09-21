@@ -1,39 +1,39 @@
 #460 Lab Assignment \#3
 
-###460 LAB Assignment \#3
-###DUE: Week of 9-19-2016
+####460 LAB Assignment \#3
+####DUE: Week of 9-19-2016
 
-1. OBJECTIVES:
+####OBJECTIVES:
 
    Kernel/User mode images and system calls
 
-2. REQUIREMENTS:
+####REQUIREMENTS:
 
    Implement the following system call functions for the MTX system:
    For each syscall, return `int` value >= 0 for success, or -1 for BAD.
 ***************************************************************************
-0. `pid = getpid()`:
+1. `pid = getpid()`:
     * Return the proc's pid
 
-1. `ps()`:       
+2. `ps()`:       
     * Enter Kerenl to print the status info of the procs
 
-2. `chname(char *s)`:
+3. `chname(char *s)`:
     * Ask for a string *s, enter Kernel to change the running proc's name to *s.
 
-3. `kfork()`:     
+4. `kfork()`:     
     * Enter Kernel to kfork a child with `/bin/u1` as Umode image
 
-4. `kswitch()`:   
+5. `kswitch()`:   
     * enter Kernel to switch process (call tswitch()).
 
-5. `pid = wait(int *exitValue)`:
+6. `pid = wait(int *exitValue)`:
     * Enter the kernel to wait for a ZOMBIE child, return its PID (or -1 if no child) and its exit value.
 
-6. `exit(int exitValue)`:
+7. `exit(int exitValue)`:
     * Enter Kernel to die with an exitValue.
 ==========================================================================
-7. `getc()` / `putc()` as syscalls to Kernel.
+8. `getc()` / `putc()` as syscalls to Kernel.
 
 ***************************************************************************
 
