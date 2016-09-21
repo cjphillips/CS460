@@ -1,26 +1,25 @@
-cp ../clean/FDimage FDimage
+VFD=bin/FDimage
+LIB=lib/mtxlib
+BCCLIB=/usr/lib/bcc/libc.a
 
-VFD=FDimage
-MyLib=../lib/4.5/mtx4.5
-out=bin
+cp clean/FDimage bin/FDimage
 
-mkdir -p bin
+echo Making system binaries ...
 
-as86 -o $out/main.s.o src/main.s
-bcc  -c -ansi -o $out/main.o src/main.c
-ld86 -d -o bin/mtx $out/main.s.o $MyLib $out/main.o kcw/mtxlib /usr/lib/bcc/libc.a
+as86 -o bin/sys_asm.o src/sys_asm.s
+bcc -c -ansi src/*.c
 
-echo mount $VFD on /mnt
+mv src/*.o bin
 
-mount -o loop $VFD /mnt
+ld86 -d -o bin/mtx bin/sys_asm.o bin/*.o $LIB $BCCLIB
 
-rm /mnt/boot/*
+sudo mount -o loop $VFD /mnt
+sudo cp bin/mtx /mnt/boot
+sudo umount /mnt
 
-cp bin/mtx /mnt/boot
-umount /mnt
+(cd src/user; mku user1);
 
-echo
-echo Press any key to launch.
-read dummy
+echo qemu-system-i386 -fda $VFD -no-fd-bootchk >> q
+chmod +x q
 
-qemu-system-i386 -fda FDimage -no-fd-bootchk
+echo Done.

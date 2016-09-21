@@ -1,16 +1,8 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 
-int init();
+PROC *kfork(char *filename);
 
-int scheduler();
-
-int body();
-
-PROC *kfork();
-
-int kwait();
-
-int kexit();
+int kexit(int exitValue);
 
 #endif /* KERNEL_H */

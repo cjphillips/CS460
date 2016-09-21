@@ -1,12 +1,17 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-int do_kfork();
+/*
+int get_word(u16 segment, u16 offset);
 
-int do_tswitch();
+void put_word(u16 word, u16 segment, u16 offset);*/
 
-int do_wait();
+void do_kfork();
 
-int do_exit();
+void do_tswitch();
+
+void do_wait();
+
+void do_exit();
 
 #endif /* UTIL_H */

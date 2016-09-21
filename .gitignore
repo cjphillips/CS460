@@ -6,17 +6,17 @@
 booter/vdisk
 booter/run
 
-lab2/FDimage
-lab2/kcw/*
-lab2/mtx
+lab1/FDimage
+lab1/kcw/*
+lab1/mtx
 
-lab3/bin/*
-lab3/Fdimage
-lab3/src/4.5
-lab3/src/update
-lab3/kcw/*
+lab2/bin/*
+lab2/Fdimage
+lab2/src/4.5
+lab2/src/update
+lab2/kcw/*
 
 *.o
 
-lab4/bin/*
-lab4/kcw/*
+lab3/bin/*
+lab3/kcw/*

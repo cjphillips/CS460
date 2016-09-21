@@ -1,4 +1,4 @@
 #!/bin/bash
 
-rm FDimage
-rm -rf bin
+sudo rm bin/*
+sudo rm q
