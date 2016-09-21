@@ -11,7 +11,7 @@
 
    Implement the following system call functions for the MTX system:
    For each syscall, return `int` value >= 0 for success, or -1 for BAD.
-***************************************************************************
+----------------------------------------------------------------------------
 1. `pid = getpid()`
     * Return the proc's pid
 
