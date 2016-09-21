@@ -88,13 +88,13 @@ In your `main()` function:
 1. initialize kernel data structures as in lab #3.
 
 2. Set Vector 80:
-        ```css
-        int int80h();    // tell C compiler inth80 is a function
-                         // _int80h: is in assembly code
-        // Use put_word(word, segment, offset) to set
+```css
+int int80h();    // tell C compiler inth80 is a function
+                 // _int80h: is in assembly code
+// Use put_word(word, segment, offset) to set
 
-        vector80 = [PC, CS] = [int80h, kernel_segment]
-        ```
+vector80 = [PC, CS] = [int80h, kernel_segment]
+```
 
 3. Modify YOUR kfork() function to
 
