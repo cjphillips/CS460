@@ -3,4 +3,6 @@
 
 PROC *kfork(char *filename);
 
+int kexit(int exitValue);
+
 #endif /* KERNEL_H */

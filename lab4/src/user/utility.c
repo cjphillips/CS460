@@ -1,12 +1,12 @@
 #include "include/user.h"
 
-char *cmds[] = { "ps", "chname", "kfork", "switch", "wait", "exit" };
+char *cmds[] = { "ps", "chname", "kfork", "switch", "wait", "exit", "menu" };
 
-int show_menu()
+int showMenu()
 {
-  printf("////////////////////////---Menu---/////\n");
-  printf(" ps, chname, kfork, switch, wait, exit \n");
-  printf("///////////////////////////////////////\n");
+  printf("<<---------------------------------Menu--->>\n");
+  printf(" ps, chname, kfork, switch, wait, exit, menu \n");
+  printf("--------------------------------------------\n");
 }
 
 int findCmd(char *command)
@@ -92,7 +92,7 @@ int exit()
   printf("Enter an exit value: ");
   exitValue = geti();
 
-  printf("Entering kernel to die with an exit value of %d.\n", exitValue);
+  printf("Entering kernel to exit with a value of %d.\n", exitValue);
 
   _exit(exitValue);
 }

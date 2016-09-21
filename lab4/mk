@@ -17,7 +17,7 @@ sudo mount -o loop $VFD /mnt
 sudo cp bin/mtx /mnt/boot
 sudo umount /mnt
 
-(cd src/user; mku umain);
+(cd src/user; mku user1);
 
 echo qemu-system-i386 -fda $VFD -no-fd-bootchk >> q
 chmod +x q

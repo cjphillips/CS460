@@ -11,6 +11,8 @@
 /*#include "include/kernel.h"*/
 #include "include/int.h"
 
+static char *ucode = "/bin/user1";
+
 int kgetpid()
 {
   return running->pid;
@@ -22,11 +24,11 @@ int kps()
   PROC *p;
 
   printf("PID  PPID  Status    Name  \n");
-  printf("---------------------------\n");
+  printf("------------------------------\n");
   for(i = 0; i < NPROC; i++)
   {
     p = &proc[i];
-    printf(" %d    %d    ", p->pid, p->ppid);
+    printf(" %d    %d  ", p->pid, p->ppid);
     switch(p->status)
     {
       case 0: printf("FREE      ");   break;
@@ -37,9 +39,8 @@ int kps()
       case 5: printf("ZOMBIE    ");   break;
       default: printf("UNKNOWN  ");   break;
     }
+    printf("%s\n", p->name);
   }
-
-  printf("%s\n", p->name);
 }
 
 int kchname(char *name)
@@ -49,6 +50,13 @@ int kchname(char *name)
 
 int kkfork()
 {
+  PROC *p = kfork(ucode);
+
+  if (p)
+  {
+    return p->pid;
+  }
+
   return -1;
 }
 
@@ -64,7 +72,7 @@ int kkwait(int *status)
 
 int kkexit(int exitValue)
 {
-  return -1;
+  return kexit(exitValue);
 }
 
 /* SYSTEM CALL HANDLER IN C CODE */
@@ -80,6 +88,8 @@ int kcinth()
   b = get_word(segment, offset + 28);
   c = get_word(segment, offset + 30);
   d = get_word(segment, offset + 32);
+
+  printf("<<  Processing syscall with Id %d >> \n", a);
 
   switch(a)
   {

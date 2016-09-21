@@ -1,6 +1,36 @@
 #include "include/type.h"
 #include "include/queue.h"
 
+int body()
+{
+    char c;
+
+    printf("Running Process: %d [ppid:%d]\n", running->pid, running->ppid);
+
+    printf("---------------------------------------------------------------\n");
+    printList("Free List   :", freeList);
+    printQueue("Ready Queue :", readyQueue);
+    printSleep();
+    printf("---------------------------------------------------------------\n\n");
+    do
+    {
+       printf("NEW! Press 'u' to go to user-mode!\n");
+       printf("[s|f|w|q|u]: ");
+       c = getc();
+       printf("%c\n", c);
+
+       switch (c)
+       {
+         case 'f': do_kfork();   break;
+         case 's': do_tswitch(); break;
+         case 'w': do_wait();    break;
+         case 'q': do_exit();    break;
+         case 'u': goUmode();    break;
+         default: printf("Unrecognized input.\n\n"); break;
+      }
+    } while(1);
+}
+
 int init()
 {
   PROC *p;
@@ -14,10 +44,12 @@ int init()
   {
     p = &proc[i];
     p->pid = i;
+    p->ppid = 0;
     p->status = FREE;
     p->priority = 0;
     strcpy(proc[i].name, pname[i]);
     p->next = &proc[i + 1];
+    p->usp    = 0xFFE8;
   }
 
   freeList = &proc[0];
@@ -26,23 +58,26 @@ int init()
 
   /* Set Proc 0 as the running process: */
   p = get_proc(&freeList);
-  p->status = RUNNING;
-  p->ppid = 0;
+  p->status = READY;
+  p->ppid   = 0;
   p->parent = p;
-  running = p;
-  nproc = 1;
+  running   = p;
+  nproc     = 1;
 
   printf("Complete.\n");
 }
 
 int scheduler()
 {
+  running->status = READY;
   if (running->status == READY)
   {
     enqueue(&readyQueue, running);
   }
 
   running = dequeue(&readyQueue);
+  running->status = RUNNING;
+
   color = running->pid + 0x0A;
 }
 
@@ -67,9 +102,9 @@ main()
   while (1)
   {
     printf("[P%d running]\n", running->pid);
-    while(!readyQueue)
+    while(readyQueue)
     {
-      printf("[Switching process away from P0]\n");
+      printf("[Switching process away from P0]\n\n");
       tswitch();
     }
   }

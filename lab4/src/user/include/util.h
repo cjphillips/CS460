@@ -1,7 +1,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-int show_menu();
+int showMenu();
 
 int findCmd(char *command);
 
