@@ -1,6 +1,6 @@
 #ifndef USER_H
 #define USER_H
 
-#define NAMESIZE 64
+#define NAMESIZE 32
 
 #endif /* USER_H */

@@ -54,6 +54,7 @@ int enqueue(PROC **queue, PROC *p)
   {
     // Empty queue
     *queue = p;
+    p->status = READY;
     return 0;
   }
 
@@ -63,6 +64,7 @@ int enqueue(PROC **queue, PROC *p)
   {
     p->next = q;
     *queue = p;
+    p->status = READY;
     return 0;
   }
 
@@ -73,6 +75,7 @@ int enqueue(PROC **queue, PROC *p)
       // Middle of the list
       p->next = q->next;
       q->next = p;
+      p->status = READY;
       return 0;
     }
 
@@ -82,6 +85,7 @@ int enqueue(PROC **queue, PROC *p)
   // End of the list
   p->next = q->next;
   q->next = p;
+  p->status = READY;
   return 0;
 }
 

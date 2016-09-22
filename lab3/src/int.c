@@ -28,24 +28,55 @@ int kps()
   for(i = 0; i < NPROC; i++)
   {
     p = &proc[i];
-    printf(" %d    %d  ", p->pid, p->ppid);
+    if (p->status != FREE)
+    {
+      printf(" %d    %d  ", p->pid, p->ppid);
+    }
+    else
+    {
+      printf("           ");
+    }
     switch(p->status)
     {
-      case 0: printf("FREE      ");   break;
-      case 1: printf("READY     ");   break;
-      case 2: printf("RUNNING   ");   break;
-      case 3: printf("STOPPED   ");   break;
-      case 4: printf("SLEEP     ");   break;
-      case 5: printf("ZOMBIE    ");   break;
-      default: printf("UNKNOWN  ");   break;
+      case FREE:    printf("FREE      ");   break;
+      case READY:   printf("READY     ");   break;
+      case RUNNING: printf("RUNNING   ");   break;
+      case STOPPED: printf("STOPPED   ");   break;
+      case SLEEP:   printf("SLEEP     ");   break;
+      case ZOMBIE:  printf("ZOMBIE    ");   break;
+      default:      printf("UNKNOWN   ");   break;
     }
     printf("%s\n", p->name);
   }
+
+  return 0;
 }
 
 int kchname(char *name)
 {
-  return -1;
+  u16 segment;
+  int i = 0;
+  char c;
+
+  if (!name)
+  {
+    return -1;
+  }
+
+  segment = running->uss;
+
+  while(i < NAMESIZE)
+  {
+    c = get_word(segment, name + i);
+    running->name[i] = c;
+    if (!c)
+    {
+      break;
+    }
+    i++;
+  }
+
+  return 0;
 }
 
 int kkfork()
@@ -75,6 +106,21 @@ int kkexit(int exitValue)
   return kexit(exitValue);
 }
 
+char *getSyscallName(int value)
+{
+  switch(value)
+  {
+    case 0: return "getpid";
+    case 1: return "ps";
+    case 2: return "chname";
+    case 3: return "kfork";
+    case 4: return "switch";
+    case 5: return "wait";
+    case 6: return "exit";
+    default: return "Invalid syscall.";
+  }
+}
+
 /* SYSTEM CALL HANDLER IN C CODE */
 int kcinth()
 {
@@ -89,7 +135,11 @@ int kcinth()
   c = get_word(segment, offset + 30);
   d = get_word(segment, offset + 32);
 
-  printf("<<  Processing syscall with Id %d >> \n", a);
+  if (a != 0)
+  {
+    /* Just to avoid printing redundant getPid syscalls */
+    printf("[KERNEL] Processing syscall: \'%s\' \n", getSyscallName(a));
+  }
 
   switch(a)
   {
@@ -100,9 +150,10 @@ int kcinth()
     case 4: r = ktswitch();   break;
     case 5: r = kkwait(&b);    break;
     case 6: r = kkexit(b);    break;
-    default: printf("[%d]: Invalid syscall.\n", a); break;
+    default: printf("[KERNEL] Invalid syscall.\n", a); break;
   }
 
+  printf("[KERNEL] Syscall returning with a value of %d.\n", r);
   /* Place the return value into the ax register at offset (8 * 2) */
   put_word(r, segment, offset + 16);
 }

@@ -16,6 +16,8 @@ typedef unsigned long  u32;
 #define SLEEP    4
 #define ZOMBIE   5
 
+#define NAMESIZE 32
+
 typedef struct proc{
     struct proc *next;
     int    *ksp;               // at offset 2
@@ -30,7 +32,7 @@ typedef struct proc{
     int    priority;
     int    event;
     int    exitCode;
-    char   name[32];           // name string of PROC
+    char   name[NAMESIZE];           // name string of PROC
 
     int    kstack[SSIZE];      // per proc stack area
 }PROC;

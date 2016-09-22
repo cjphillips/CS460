@@ -44,7 +44,7 @@ int kwait(int *status)
         if (p->status == ZOMBIE)
         {
           // Found a dead child process
-          printf("Found zombie process [%d].\n", p->pid);
+          printf("[KERNEL] Found zombie process [%d].\n", p->pid);
           *status = p->exitCode;
           p->status = FREE;
           put_proc(&freeList, p);

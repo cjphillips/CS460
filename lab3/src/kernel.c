@@ -3,6 +3,7 @@
 #include "include/wait.h"
 
 #define NUMREG 13
+#define FLAG   0x0020
 
 extern int body();
 
@@ -10,20 +11,24 @@ void set_registers(u16 segment, u16 offset)
 {
   int i;
 
-  /*put_word(segment, segment, running->ksp + -2);
-  put_word(segment, segment, running->ksp + -4);
-  put_word(segment, segment, segment-2); // DS
-  put_word(segment, segment, segment-2); // ES*/
-  for(i = 1; i < NUMREG; i++)
+  printf("  -> usp=%x\n", offset);
+
+  for(i = 0; i < NUMREG - 1; i++)
   {
-    put_word(0, segment, i*-2);
-    /* DI, SI, BP, DX, CX, BX, AX, PC=VA(0)
-    put_word(0, segment, (i + 3) * segment-2);*/
+    /* DI, SI, BP, DX, CX, BX, AX, PC=VA(0)*/
+    put_word(0, segment, offset + i * 2);
   }
+
   put_word(segment, segment, offset); // DS
   put_word(segment, segment, offset + 2); // ES
   put_word(segment, segment, offset + 20);  // CS
-  put_word(0x0020, segment, offset + 18);   // flag
+  put_word(FLAG, segment, offset + 22);   // flag
+
+  printf("  [DS(&..%d)=%x]\n  [ES(&..%d)=%x]\n  [FL(&..%d)=%x]\n  [CS(&..%d)=%x]\n",
+    offset,      segment,
+    offset + 2,  segment,
+    offset + 20, segment,
+    offset + 22, FLAG);
 }
 
 PROC *kfork(char *filename)
@@ -32,14 +37,14 @@ PROC *kfork(char *filename)
   u16 segment;
   PROC *p;
 
-  printf("Process [%d] attemping fork ... ", running->pid);
+  printf("[KERNEL] Process [%d] attemping fork ... ", running->pid);
   p = get_proc(&freeList);
   if (!p)
   {
     printf("failed: No more available processes.\n");
     return 0;
   }
-  printf("Done.\n");
+  printf("\n");
 
   p->status = READY;
   p->priority = 1;
@@ -57,19 +62,20 @@ PROC *kfork(char *filename)
   p->kstack[SSIZE - 1] = (int)body;
   p->ksp = &(p->kstack[SSIZE - 9]);
 
-  p->usp = proc[p->pid].usp;
+  p->usp = running->usp;
   p->uss = segment;
 
+  printf("[KERNEL] ");
   load(filename, segment);
 
-  printf("Setting registers ... ");
+  printf("[KERNEL] Setting registers ...\n");
   set_registers(segment, p->usp);
-  printf("Done.\n");
 
   enqueue(&readyQueue, p);
 
-  printf("Success: Process [%d] forked at segment %x.\n", p->pid, segment);
+  printf("[KERNEL] Success: Process [%d] forked at segment %x.\n", p->pid, segment);
 
+  nproc++;
   return p;
 }
 
@@ -80,7 +86,7 @@ int kexit(int exitValue)
 
   if (running->pid == 1 && nproc > 2)
   {
-    printf("Cannot exit, child processes are still running (P1 cannot die yet).\n");
+    printf("[KERNEL] Cannot exit, child processes are still running (P1 cannot die yet).\n");
     return -1;
   }
 
@@ -100,14 +106,15 @@ int kexit(int exitValue)
   running->exitCode = exitValue;
   running->status = ZOMBIE;
 
-  printf("Process [%d] exited with code %d.\n", running->pid, exitValue);
+  printf("[KERNEL] Process [%d] exited with code %d.\n", running->pid, exitValue);
 
   // Wakeup parent (and also P1 if necessary)
   kwakeup(running->parent);
   if (wakeupP1)
   {
-    printf("Waking up process [1].\n");
+    printf("[KERNEL] Waking up process [1].\n");
     kwakeup(&proc[1]);
   }
+  getc();
   tswitch(); // Give up the CPU
 }

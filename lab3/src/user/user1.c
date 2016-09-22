@@ -10,15 +10,12 @@ main()
 {
   char name[NAMESIZE];
   int pid, cmd;
-
+  pid = getpid();
+  color = pid + 0x0A;
   while(1)
   {
-    pid = getpid();
-    color = 0x0C;
-
     printf("--------------------------------------------\n");
-    printf("Process [%d] in U-Mode.\n");
-    printf("Running in segment %x\n", pid, getcs());
+    printf("[PROC %d] in segment %x.\n", pid, getcs());
     printf("--------------------------------------------\n");
 
     showMenu();

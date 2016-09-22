@@ -4,8 +4,8 @@
 int body()
 {
     char c;
-
-    printf("Running Process: %d [ppid:%d]\n", running->pid, running->ppid);
+    color = 0x0A;
+    printf("[KERNEL] P%d running.\n", running->pid);
 
     printf("---------------------------------------------------------------\n");
     printList("Free List   :", freeList);
@@ -36,9 +36,7 @@ int init()
   PROC *p;
   int i;
 
-  color = 0x0C;
-
-  printf("Initializing processes ... ");
+  printf("[KERNEL] Initializing processes ... ");
 
   for(i = 0; i < NPROC; i++)
   {
@@ -49,7 +47,6 @@ int init()
     p->priority = 0;
     strcpy(proc[i].name, pname[i]);
     p->next = &proc[i + 1];
-    p->usp    = 0xFFE8;
   }
 
   freeList = &proc[0];
@@ -58,27 +55,25 @@ int init()
 
   /* Set Proc 0 as the running process: */
   p = get_proc(&freeList);
-  p->status = READY;
+  p->status = RUNNING;
   p->ppid   = 0;
   p->parent = p;
   running   = p;
   nproc     = 1;
+  p->usp    = 0xFFE8;
 
   printf("Complete.\n");
 }
 
 int scheduler()
 {
-  running->status = READY;
   if (running->status == READY)
   {
     enqueue(&readyQueue, running);
   }
 
   running = dequeue(&readyQueue);
-  running->status = RUNNING;
-
-  color = running->pid + 0x0A;
+  running->status = READY;
 }
 
 int int80h();
@@ -93,6 +88,7 @@ int set_vector(u16 vector, u16 handler)
 
 main()
 {
+  color = 0x0C;
   printf("\n\nWelcome! Starting in MTX kernel.\n\n");
   init();
   set_vector(80, int80h);
@@ -101,10 +97,10 @@ main()
 
   while (1)
   {
-    printf("[P%d running]\n", running->pid);
+    printf("[KERNEL] P%d running.\n", running->pid);
     while(readyQueue)
     {
-      printf("[Switching process away from P0]\n\n");
+      printf("[KERNEL] Switching process away from P0.\n\n");
       tswitch();
     }
   }

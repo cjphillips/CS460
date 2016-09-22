@@ -19,7 +19,7 @@ sudo umount /mnt
 
 (cd src/user; mku user1);
 
-echo qemu-system-i386 -fda $VFD -no-fd-bootchk >> q
+echo "qemu-system-i386 -fda $VFD -no-fd-bootchk" >> q
 chmod +x q
 
 echo Done.

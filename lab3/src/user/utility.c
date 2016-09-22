@@ -36,9 +36,11 @@ int ps()
 int chname()
 {
   char s[NAMESIZE];
+  int pid = getpid();
 
-  printf("New name: ");
+  printf("[PROC %d] New name: ", pid);
   gets(s);
+
   return syscall(2, s, 0);
 }
 
@@ -47,11 +49,14 @@ int kfork()
   int child, pid;
 
   pid = getpid();
-  printf("Process [%d] entering the kernel to fork a child.\n", pid);
+  printf("[PROC %d] Entering the kernel to fork a child.\n", pid);
 
   child = syscall(3, 0, 0);
 
-  printf("Process [%d] forked child process [%d]\n", pid, child);
+  if (child >= 0)
+  {
+    printf("[PRPC %d] Forked child process [%d]\n", pid, child);
+  }
 }
 
 int kswitch()
@@ -61,38 +66,43 @@ int kswitch()
 
 int geti()
 {
-  int intValue;
-
-  char c = getc();
-  intValue = atoi(c);
-
-  return intValue;
+  char s[16];
+  return atoi(gets(s));
 }
 
 int wait()
 {
+  int pid;
   int child, exitValue;
 
-  printf("Process [%d] entering the kernel to wait for a child process to die.\n", getpid());
+  pid = getpid();
+
+  printf("[PROC %d] Entering the kernel to wait for a child process to die.\n", pid);
   child = syscall(5, &exitValue, 0);
 
-  printf("Process [%d] back from 'wait' call.\n", getpid());
-  printf("--> Found zombie process [%d].\n", child);
+  printf("[PROC %d] Back from 'wait' call.\n", pid);
 
   if (child >= 0)
   {
-    printf("----> Child process had an exit value of %d.\n", exitValue);
+    printf("[PROC %d] --> Found zombie process [%d].\n", pid, child);
+    printf("[PROC %d] ----> Child process had an exit value of %d.\n", pid, exitValue);
+  }
+  else
+  {
+    printf("[PROC %d] --> No child processes.\n", pid);
+    return -1;
   }
 }
 
 int exit()
 {
   int exitValue;
+  int pid = getpid();
 
-  printf("Enter an exit value: ");
+  printf("[PROC %d] Enter an exit value: ", pid);
   exitValue = geti();
 
-  printf("Entering kernel to exit with a value of %d.\n", exitValue);
+  printf("[PROC %d] Entering kernel to exit with a value of %d.\n", pid, exitValue);
 
   _exit(exitValue);
 }
