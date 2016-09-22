@@ -115,6 +115,6 @@ int kexit(int exitValue)
     printf("[KERNEL] Waking up process [1].\n");
     kwakeup(&proc[1]);
   }
-  getc();
+
   tswitch(); // Give up the CPU
 }

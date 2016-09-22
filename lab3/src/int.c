@@ -46,7 +46,9 @@ int kps()
       case ZOMBIE:  printf("ZOMBIE    ");   break;
       default:      printf("UNKNOWN   ");   break;
     }
+    color = 0x0A + p->pid;
     printf("%s\n", p->name);
+    color = 0x0A;
   }
 
   return 0;
@@ -98,7 +100,10 @@ int ktswitch()
 
 int kkwait(int *status)
 {
-  return -1;
+  int r = kwait(status);
+  put_word(*status, running->uss, status);
+
+  return r;
 }
 
 int kkexit(int exitValue)

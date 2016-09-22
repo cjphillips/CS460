@@ -67,13 +67,14 @@ int init()
 
 int scheduler()
 {
-  if (running->status == READY)
+  if (running->status == RUNNING)
   {
+    running->status = READY;
     enqueue(&readyQueue, running);
   }
 
   running = dequeue(&readyQueue);
-  running->status = READY;
+  running->status = RUNNING;
 }
 
 int int80h();
