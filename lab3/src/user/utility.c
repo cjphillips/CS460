@@ -67,7 +67,9 @@ int kswitch()
 int geti()
 {
   char s[16];
-  return atoi(gets(s));
+  gets(s);
+
+  return atoi(s);
 }
 
 int wait()

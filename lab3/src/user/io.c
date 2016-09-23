@@ -158,6 +158,22 @@ int printf(char *fmt, ...)
   }
 }
 
+int atoi(char *str)
+{
+  int result = 0;
+  int i = 0;
+
+  BASE = 10;
+
+  while(str[i])
+  {
+    result = result * BASE + str[i] - '0';
+    i++;
+  }
+
+  return result;
+}
+
 void gets(char *str)
 {
   int i = 0;

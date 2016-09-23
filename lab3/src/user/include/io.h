@@ -3,6 +3,8 @@
 
 int printf(char *fmt, ...);
 
+int atoi(char *str);
+
 void gets(char *str);
 
 #endif /* IO_H */
