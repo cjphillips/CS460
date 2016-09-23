@@ -4,7 +4,7 @@
 int body()
 {
     char c;
-    color = 0x0A;
+    color = 0x02;
     printf("[KERNEL] P%d running.\n", running->pid);
 
     printf("---------------------------------------------------------------\n");
@@ -89,20 +89,19 @@ int set_vector(u16 vector, u16 handler)
 
 main()
 {
-  color = 0x0C;
+  color = 0x04;
   printf("\n\nWelcome! Starting in MTX kernel.\n\n");
   init();
   set_vector(80, int80h);
 
   kfork("/bin/user1"); // Fork to process 1
 
-  while (1)
+  printf("[KERNEL] P%d running.\n", running->pid);
+  while(readyQueue)
   {
-    printf("[KERNEL] P%d running.\n", running->pid);
-    while(readyQueue)
-    {
-      printf("[KERNEL] Switching process away from P0.\n\n");
-      tswitch();
-    }
+    printf("[KERNEL] Switching process away from P0.\n\n");
+    tswitch();
   }
+
+  printf("< No runnable processes -- System halting >.\n");
 }

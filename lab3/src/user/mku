@@ -7,9 +7,9 @@ sudo rm /mnt/bin/*
 sudo umount /mnt
 
 echo Making $1 ...
-bcc -c -ansi $1.c utility.c
+bcc -c -ansi $1.c utility.c io.c
 as86 -o user.o user.s
-ld86 -o $1 user.o $1.o utility.o $MtxLib $BccLib
+ld86 -o $1 user.o $1.o utility.o io.o $MtxLib $BccLib
 
 sudo mount -o loop $VFD /mnt
 sudo cp $1 /mnt/bin/$1

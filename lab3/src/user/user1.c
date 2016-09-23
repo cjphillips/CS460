@@ -1,9 +1,7 @@
 #include "include/user.h"
 #include "include/util.h"
+#include "include/io.h"
 
-extern int getcs();
-
-int color;
 int (*fptr[ ])() = {ps, chname, kfork, kswitch, wait, exit, showMenu };
 
 main()
@@ -11,7 +9,7 @@ main()
   char name[NAMESIZE];
   int pid, cmd;
   pid = getpid();
-  color = pid + 0x0A;
+  color = pid + 0x04;
   while(1)
   {
     printf("--------------------------------------------\n");

@@ -3,6 +3,7 @@
        .globl _main,_running,_scheduler
        .globl _proc, _procSize
        .globl _tswitch
+       .globl _getc, _putc, _color
 
         jmpi   start,MTXSEG
 
@@ -14,6 +15,9 @@ start:	mov  ax,cs
 	add  sp,_procSize
 
 	call _main
+
+idle:
+        jmp  idle
 
 _tswitch:
 SAVE:
@@ -86,19 +90,38 @@ _int80h:
 
 _goUmode:
         cli
-	mov bx,_running 	! bx -> proc
-        mov ax,USS[bx]
-        mov ss,ax               ! restore uSS
-        mov sp,USP[bx]          ! restore uSP
+	mov  bx,_running 	! bx -> proc
+        mov  ax,USS[bx]
+        mov  ss,ax               ! restore uSS
+        mov  sp,USP[bx]          ! restore uSP
 
-	pop ds
-	pop es
-	pop di
-        pop si
-        pop bp
-        pop dx
-        pop cx
-        pop bx
-        pop ax                  ! NOTE: contains return value to Umode
+	pop  ds
+	pop  es
+	pop  di
+        pop  si
+        pop  bp
+        pop  dx
+        pop  cx
+        pop  bx
+        pop  ax                  ! NOTE: contains return value to Umode
 
         iret
+
+_getc:
+        xorb  ah, ah     ! Clear the ah register
+        int   0x16       ! Call BIOS to get a character into ax
+        andb  al, #0x7F  ! 7-bit ASCII
+        ret
+
+
+_putc:
+        push  bp
+        mov   bp, sp
+
+        movb  al, 4[bp]  ! Get the character into aL
+        movb  ah, #14    ! ah = 14
+        mov   bx, _color ! Cyan
+        int   0x10       ! Call BIOS to display the character
+
+        pop bp
+        ret

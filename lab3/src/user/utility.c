@@ -73,7 +73,7 @@ int geti()
 int wait()
 {
   int pid;
-  int child, exitValue;
+  int child, exitValue = -1;
 
   pid = getpid();
 

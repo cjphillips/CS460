@@ -46,11 +46,10 @@ int kps()
       case ZOMBIE:  printf("ZOMBIE    ");   break;
       default:      printf("UNKNOWN   ");   break;
     }
-    color = 0x0A + p->pid;
+    color = 0x04 + p->pid;
     printf("%s\n", p->name);
-    color = 0x0A;
+    color = 0x04;
   }
-
   return 0;
 }
 
@@ -100,10 +99,28 @@ int ktswitch()
 
 int kkwait(int *status)
 {
-  int r = kwait(status);
-  put_word(*status, running->uss, status);
+  int kstatus = -1;
+
+  int r = kwait(&kstatus);
+  put_word(kstatus, running->uss, status);
 
   return r;
+}
+
+char kgetc()
+{
+  return getc();
+}
+
+int kputc(char c, int kcolor)
+{
+  int temp = color; // Store the kernel's color
+  color = kcolor;   // Use the color passed in
+
+  putc(c);
+  color = temp;     // Restore the kernel's color
+
+  return 0;
 }
 
 int kkexit(int exitValue)
@@ -122,6 +139,8 @@ char *getSyscallName(int value)
     case 4: return "switch";
     case 5: return "wait";
     case 6: return "exit";
+    case 7: return "getc";
+    case 8: return "putc";
     default: return "Invalid syscall.";
   }
 }
@@ -134,15 +153,16 @@ int kcinth()
 
   segment = running->uss;
   offset = running->usp;
+  color = 0x04;
 
   a = get_word(segment, offset + 26);
   b = get_word(segment, offset + 28);
   c = get_word(segment, offset + 30);
   d = get_word(segment, offset + 32);
 
-  if (a != 0)
+  if (a != 0 && a != 7 && a != 8)
   {
-    /* Just to avoid printing redundant getPid syscalls */
+    /* Just to avoid printing redundant getPid, getc, and putc syscalls */
     printf("[KERNEL] Processing syscall: \'%s\' \n", getSyscallName(a));
   }
 
@@ -151,14 +171,20 @@ int kcinth()
     case 0: r = kgetpid();   break;
     case 1: r = kps();       break;
     case 2: r = kchname(b);  break;
-    case 3: r = kkfork();     break;
-    case 4: r = ktswitch();   break;
-    case 5: r = kkwait(&b);    break;
-    case 6: r = kkexit(b);    break;
+    case 3: r = kkfork();    break;
+    case 4: r = ktswitch();  break;
+    case 5: r = kkwait(b);   break;
+    case 6: r = kkexit(b);   break;
+    case 7: r = kgetc();     break;
+    case 8: r = kputc(b, c);     break;
     default: printf("[KERNEL] Invalid syscall.\n", a); break;
   }
 
-  printf("[KERNEL] Syscall returning with a value of %d.\n", r);
+  if (a != 0 && a != 7 && a != 8)
+  {
+    /* Just to avoid printing redundant getPid, getc, and putc syscalls */
+    printf("[KERNEL] Syscall returning with a value of %d.\n", r);
+  }
   /* Place the return value into the ax register at offset (8 * 2) */
   put_word(r, segment, offset + 16);
 }
