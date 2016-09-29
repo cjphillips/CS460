@@ -7,17 +7,24 @@ int (*fptr[ ])() = {ps, chname, fork, exec, kswitch, wait, exit, showMenu };
 main(int argc, char *argv[])
 {
   char name[NAMESIZE];
-  int pid, cmd;
+  int pid, cmd, i = 0, *temp;
   pid = getpid();
   color = pid + 0x04;
+
   while(1)
   {
     printf("------------------------------------------------------\n");
     printf("[PROC %d - USER TWO CODE] in segment %x.\n", pid, getcs());
+    printf(" --> argc = %d\n", argc);
+    while(i < argc)
+    {
+      printf(" --> [%d] %s\n", i, argv[i]);
+      i++;
+    }
     printf("------------------------------------------------------\n");
 
-    showMenu();
     do {
+      showMenu();
       printf("> ");
       gets(name);
 
@@ -41,5 +48,9 @@ main(int argc, char *argv[])
 
 crt0(char *str)
 {
-  main(0, 0);
+  int argc = 0;
+  printf("\n");
+  argc = tokenize(str);
+
+  main(argc, args);
 }

@@ -52,34 +52,24 @@ int kexec(char *command_line)
     ? argsLength + 2
     : argsLength + 1;
 
-  i = 0;
-  while(args[i])
-  {
-    put_byte(args[i], segment, -i);
-    i++;
-  }
-  put_byte(0, segment, -i);
-  if (i % 2 != 0)
-  {
-    i++;
-    put_byte(0, segment, -i);
-  }
-
-  put_word(args, segment, -i - 2);
-
   /* Re-initialize the user's proc stack so that it returns to VA (0) */
-  for(i = argsLength + 3; i <= 12; i++)
+  for(i = 1; i <= 12; i++)
   {
-    put_word(0, segment, -2*i);
+    put_word(0, segment, segment - 2*i - (2 + argsLength));
   }
-  running->usp = 0xFFE8 - (2 + argsLength); // New USP at -24 - (2 + even command line length)
+  running->usp = segment - 24 - (2 + argsLength); // New USP at -24 - (2 + even command line length)
 
+  put_word(segment - argsLength, segment, segment - (2 + argsLength));
+  for(i = 0; i < argsLength; i++)
+  {
+    put_word(args[i], segment, segment - (argsLength- i));
+  }
   /* -1  -2  -3  -4  -5  -6  -7  -8  -9  -10  -11  -12    (Ustack layout) */
   /* FL  CS  PC  AX  BX  CX  DX  BP  SI  DI   ES   DS     (Registers)     */
-  put_word(segment, segment, -2*12);
-  put_word(segment, segment, -2*11);
-  put_word(segment, segment, -2*2);
-  put_word(0x0200,  segment, -2);
+  put_word(segment, segment, segment-2*12 - (2 + argsLength));
+  put_word(segment, segment, segment-2*11 - (2 + argsLength));
+  put_word(segment, segment, segment-2*2 - (2 + argsLength));
+  put_word(0x0200,  segment, segment-2 - (2 + argsLength));
 }
 
 void set_registers(u16 segment, u16 offset)
