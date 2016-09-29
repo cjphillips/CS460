@@ -3,7 +3,7 @@
 
 int showMenu();
 
-char *strtok(char *s, char delim);
+int tokenize(char *path, char *delim, char **out);
 
 int findCmd(char *command);
 

@@ -3,22 +3,28 @@
 #include "include/io.h"
 
 int (*fptr[ ])() = {ps, chname, fork, exec, kswitch, wait, exit, showMenu };
-char *cmds[10];
 
 main(int argc, char *argv[])
 {
   char name[NAMESIZE];
-  int pid, cmd;
+  int pid, cmd, i = 0, *temp;
   pid = getpid();
   color = pid + 0x04;
+
   while(1)
   {
     printf("------------------------------------------------------\n");
     printf("[PROC %d - USER ONE CODE] in segment %x.\n", pid, getcs());
+    printf(" --> argc = %d\n", argc);
+    while(i < argc)
+    {
+      printf(" --> [%d] %s\n", i, argv[i]);
+      i++;
+    }
     printf("------------------------------------------------------\n");
 
-    showMenu();
     do {
+      showMenu();
       printf("> ");
       gets(name);
 
@@ -40,37 +46,11 @@ main(int argc, char *argv[])
   }
 }
 
-main0(char *str)
+crt0(char *str)
 {
-  int i = 0, argc;
-  char *arg;
+  int argc = 0;
 
-  if (str)
-  {
-    printf("str is not empty, str = %d\n", str);
-  }
-  else
-  {
-    printf("str is def empty\n");
-  }
+  argc = tokenize(str);
 
-  printf("HERE!\n");
-
-  arg = strtok(str, ' ');
-
-  printf("AFTER FIRST STRTOK with arg=%s\n", arg);
-
-  while(arg)
-  {
-    cmds[i] = arg;
-    arg = strtok(0, ' ');
-    i++;
-  }
-
-  argc = i;
-
-  /* Finish initializing the cmd vector */
-  while(i < 10) { cmds[i] = 0; }
-
-  main(argc, cmds);
+  main(argc, args);
 }

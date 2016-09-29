@@ -11,6 +11,8 @@ typedef unsigned long  u32;
 extern int getcs();
 extern int syscall();
 
+char *args[NAMESIZE];
+
 int color;
 
 #endif /* USER_H */

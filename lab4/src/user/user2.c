@@ -39,7 +39,7 @@ main(int argc, char *argv[])
   }
 }
 
-main0(char *str)
+crt0(char *str)
 {
   main(0, 0);
 }

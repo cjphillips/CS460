@@ -1,7 +1,7 @@
-        .global _syscall, _main0, _exit, _getcs, auto_start
+        .global _syscall, _crt0, _exit, _getcs, auto_start
 
 auto_start:
-        call  _main0
+        call  _crt0
 
 ! If main() ever returns, call exit(0)
         push  #0

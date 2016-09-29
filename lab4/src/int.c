@@ -178,11 +178,11 @@ int kcinth()
     case 6: r = kkexit(b);    break;
     case 7: r = kgetc();      break;
     case 8: r = kputc(b, c);  break;
-    case 9: r = kkexec(b);     break;
-    default: printf("[KERNEL] Invalid syscall.\n", a); break;
+    case 9: r = kkexec(b);    break;
+    default: printf("[KERNEL] Invalid syscall.\n", a); r = -1; break;
   }
 
-  if (a != 0 && a != 7 && a != 8)
+  if (a != 0 && a != 7 && a != 8 && (a == 9 && r < 0))
   {
     /* Just to avoid printing redundant getPid, getc, and putc syscalls */
     printf("[KERNEL] Syscall returning with a value of %d.\n", r);

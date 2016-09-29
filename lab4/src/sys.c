@@ -14,7 +14,6 @@ int body()
     printf("---------------------------------------------------------------\n\n");
     do
     {
-       printf("NEW! Press 'u' to go to user-mode!\n");
        printf("[s|f|w|q|u]: ");
        c = getc();
        printf("%c\n", c);

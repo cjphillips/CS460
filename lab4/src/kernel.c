@@ -7,39 +7,84 @@
 
 extern int body();
 
-int kexec(char *ufile)
+int strlen(char *s)
 {
-  int i, length = 0;
-  char filename[FILE_LENGTH], *cp = filename;
+  int i = 0;
+
+  while(*s)
+  {
+    s++;
+    i++;
+  }
+
+  return i;
+}
+
+int kexec(char *command_line)
+{
+  int i = 0, length = 0, argsLength = 0;
+  char args[FILE_LENGTH], exe[FILE_LENGTH], *cp = args;
 
   u16 segment = running->uss;
 
   /* Get the filename from the user's segment */
-  while( (*cp++ = get_byte(segment, ufile++)) && length++ < 64);
+  while( (*cp++ = get_byte(segment, command_line++)) && length++ < 64);
 
-  if (load(filename, segment) < 0)
+  printf("[KEXEC] command_line = %s\n", args);
+
+  while(args[i] && args[i] != ' ')
+  {
+    exe[i] = args[i];
+    i++;
+  }
+  exe[i] = 0;
+
+  printf("exe=%s\n", exe);
+
+  if (load(exe, segment) < 0)
   {
     return -1;
   }
 
+  argsLength = strlen(args);
+
+  argsLength = argsLength % 2 == 0
+    ? argsLength + 2
+    : argsLength + 1;
+
+  i = 0;
+  while(args[i])
+  {
+    put_byte(args[i], segment, -i);
+    i++;
+  }
+  put_byte(0, segment, -i);
+  if (i % 2 != 0)
+  {
+    i++;
+    put_byte(0, segment, -i);
+  }
+
+  put_word(args, segment, -i - 2);
+
   /* Re-initialize the user's proc stack so that it returns to VA (0) */
-  for(i = 1; i < 12; i++)
+  for(i = argsLength + 3; i <= 12; i++)
   {
     put_word(0, segment, -2*i);
   }
-  running->usp = 0xFFE8; // New USP at -24
+  running->usp = 0xFFE8 - (2 + argsLength); // New USP at -24 - (2 + even command line length)
 
   /* -1  -2  -3  -4  -5  -6  -7  -8  -9  -10  -11  -12    (Ustack layout) */
   /* FL  CS  PC  AX  BX  CX  DX  BP  SI  DI   ES   DS     (Registers)     */
   put_word(segment, segment, -2*12);
   put_word(segment, segment, -2*11);
-  put_word(segment, segment, -2*-2);
-  put_word(0x0020,  segment, -2);
+  put_word(segment, segment, -2*2);
+  put_word(0x0200,  segment, -2);
 }
 
 void set_registers(u16 segment, u16 offset)
 {
-  int i;
+  int i, len;
 
   for(i = 0; i < NUMREG - 1; i++)
   {
@@ -65,7 +110,7 @@ void copyImage(u16 parentSeg, u16 childSeg, u16 size)
 
 PROC *kfork(char *filename)
 {
-  int i;
+  int i, len;
   u16 segment;
   PROC *p;
 
@@ -100,12 +145,15 @@ PROC *kfork(char *filename)
   if (filename)
   {
     printf("[KERNEL] ");
-    load(filename, segment);
-
-    printf("[KERNEL] Setting registers ... ");
-    set_registers(segment, p->usp);
-    printf("done.\n");
+    if (load(filename, segment) < 0)
+    {
+      return 0;
+    }
   }
+
+  printf("[KERNEL] Setting registers ... ");
+  set_registers(segment, running->usp, filename);
+  printf("done.\n");
 
   enqueue(&readyQueue, p);
 

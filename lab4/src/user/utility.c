@@ -2,8 +2,6 @@
 
 char *cmds[] = { "ps", "chname", "fork", "exec", "switch", "wait", "exit", "menu" };
 
-static char *prevStr;
-
 int showMenu()
 {
   printf("<<---------------------------------------Menu--->>\n");
@@ -25,32 +23,38 @@ int findCmd(char *command)
   return -1;
 }
 
-char *strtok(char *s, char delim)
+int tokenize(char *s)
 {
   int i = 0;
-  char cur[NAMESIZE], *at = !s ? prevStr : s;
 
-  if(!at)
+  while(*s)
   {
-    return 0;
-  }
+    while(*s == ' ')
+    {
+      *s++ = 0;
+    }
+    if (*s)
+    {
+      args[i++] = s;
+    }
+    while(*s && *s != ' ')
+    {
+      s++;
+    }
 
-  while(*at && *at != delim)
-  {
-    cur[i] = *at;
+    if (*s)
+    {
+      *s = 0;
+      s++;
+    }
+    else
+    {
+      break;
+    }
   }
+  args[i] = 0;
 
-  if (*at == delim)
-  {
-    at++;
-    prevStr = at;
-  }
-  else
-  {
-    prevStr = 0;
-  }
-
-  return (char *)cur;
+  return i;
 }
 
 int getpid()
@@ -79,7 +83,7 @@ int exec()
   int r;
   char filename[FILE_LENGTH];
 
-  printf("\nEnter executable path: ");
+  printf("\nEnter command: ");
   gets(filename);
 
   r = syscall(9, filename, 0, 0);
@@ -96,7 +100,7 @@ int fork()
 
   child = syscall(3, 0, 0);
 
-  if (child >= 0)
+  if (child > 0)
   {
     printf("[PROC %d] Forked child process [%d]\n", pid, child);
   }
