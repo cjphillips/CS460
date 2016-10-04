@@ -2,8 +2,7 @@
 #include "include/util.h"
 #include "include/io.h"
 
-int (*fptr[ ])() = {ps, chname, fork, exec, kswitch, wait, exit, showMenu, pfd, pipe,
-                    close, write, read };
+int (*fptr[ ])() = {ps, chname, fork, exec, kswitch, wait, exit, showMenu };
 
 main(int argc, char *argv[])
 {

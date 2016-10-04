@@ -2,8 +2,7 @@
 #include "include/util.h"
 #include "include/io.h"
 
-int (*fptr[ ])() = {ps, chname, fork, exec, kswitch, wait, exit, showMenu, pfd, pipe,
-                    close, write, read };
+int (*fptr[ ])() = {ps, chname, fork, exec, kswitch, wait, exit, showMenu };
 
 main(int argc, char *argv[])
 {
@@ -15,7 +14,7 @@ main(int argc, char *argv[])
   while(1)
   {
     printf("------------------------------------------------------\n");
-    printf("[PROC %d - USER TWO CODE] in segment %x.\n", pid, getcs());
+    printf("[PROC %d - USER ONE CODE] in segment %x.\n", pid, getcs());
     printf(" --> argc = %d\n", argc);
     while(i < argc)
     {
@@ -50,7 +49,7 @@ main(int argc, char *argv[])
 crt0(char *str)
 {
   int argc = 0;
-  printf("\n");
+  printf("\n"); 
   argc = tokenize(str);
 
   main(argc, args);
