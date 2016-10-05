@@ -174,6 +174,33 @@ int atoi(char *str)
   return result;
 }
 
+u32 atoh(char *str)
+{
+  u32 value = 0, digit;
+  char c;
+
+  while((c = *str++) != '\0')
+  {
+    if (c >= '0' && c <= '9')
+    {
+      digit = (u32)(c - '0');
+    }
+    else if(c >= 'a' && c <= 'f')
+    {
+      digit = (u32) (c - 'a') + 10;
+    }
+    else if(c >= 'A' && c <= 'F')
+    {
+      digit = (u32) (c - 'A') + 10;
+    }
+    else break;
+
+    value = (value << 4) + digit;
+  }
+
+  return value;
+}
+
 void gets(char *str)
 {
   int i = 0;

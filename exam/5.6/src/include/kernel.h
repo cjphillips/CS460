@@ -7,4 +7,6 @@ PROC *kfork(char *filename);
 
 int kexit(int exitValue);
 
+int khop(u16 segment);
+
 #endif /* KERNEL_H */

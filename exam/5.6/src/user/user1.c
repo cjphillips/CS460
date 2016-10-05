@@ -2,7 +2,7 @@
 #include "include/util.h"
 #include "include/io.h"
 
-int (*fptr[ ])() = {ps, chname, fork, exec, kswitch, wait, exit, showMenu };
+int (*fptr[ ])() = {ps, chname, fork, exec, kswitch, wait, exit, showMenu, hop };
 
 main(int argc, char *argv[])
 {
@@ -13,17 +13,18 @@ main(int argc, char *argv[])
 
   while(1)
   {
-    printf("------------------------------------------------------\n");
-    printf("[PROC %d - USER ONE CODE] in segment %x.\n", pid, getcs());
-    printf(" --> argc = %d\n", argc);
-    while(i < argc)
+    do
     {
-      printf(" --> [%d] %s\n", i, argv[i]);
-      i++;
-    }
-    printf("------------------------------------------------------\n");
+      printf("------------------------------------------------------\n");
+      printf("[PROC %d - USER ONE CODE] in segment %x.\n", pid, getcs());
+      printf(" --> argc = %d\n", argc);
+      while(i < argc)
+      {
+        printf(" --> [%d] %s\n", i, argv[i]);
+        i++;
+      }
+      printf("------------------------------------------------------\n");
 
-    do {
       showMenu();
       printf("> ");
       gets(name);
@@ -49,7 +50,7 @@ main(int argc, char *argv[])
 crt0(char *str)
 {
   int argc = 0;
-  printf("\n"); 
+  printf("\n");
   argc = tokenize(str);
 
   main(argc, args);

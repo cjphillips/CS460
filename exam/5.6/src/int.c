@@ -132,16 +132,17 @@ char *getSyscallName(int value)
 {
   switch(value)
   {
-    case 0: return "getpid";
-    case 1: return "ps";
-    case 2: return "chname";
-    case 3: return "fork";
-    case 4: return "switch";
-    case 5: return "wait";
-    case 6: return "exit";
-    case 7: return "getc";
-    case 8: return "putc";
-    case 9: return "exec";
+    case 0:  return "getpid";
+    case 1:  return "ps";
+    case 2:  return "chname";
+    case 3:  return "fork";
+    case 4:  return "switch";
+    case 5:  return "wait";
+    case 6:  return "exit";
+    case 7:  return "getc";
+    case 8:  return "putc";
+    case 9:  return "exec";
+    case 10: return "hop";
     default: return "Invalid syscall.";
   }
 }
@@ -169,16 +170,17 @@ int kcinth()
 
   switch(a)
   {
-    case 0: r = kgetpid();    break;
-    case 1: r = kps();        break;
-    case 2: r = kchname(b);   break;
-    case 3: r = kkfork();     break;
-    case 4: r = ktswitch();   break;
-    case 5: r = kkwait(b);    break;
-    case 6: r = kkexit(b);    break;
-    case 7: r = kgetc();      break;
-    case 8: r = kputc(b, c);  break;
-    case 9: r = kkexec(b);    break;
+    case 0:  r = kgetpid();    break;
+    case 1:  r = kps();        break;
+    case 2:  r = kchname(b);   break;
+    case 3:  r = kkfork();     break;
+    case 4:  r = ktswitch();   break;
+    case 5:  r = kkwait(b);    break;
+    case 6:  r = kkexit(b);    break;
+    case 7:  r = kgetc();      break;
+    case 8:  r = kputc(b, c);  break;
+    case 9:  r = kkexec(b);    break;
+    case 10: r = khop(b);      break;
     default: printf("[KERNEL] Invalid syscall.\n", a); r = -1; break;
   }
 

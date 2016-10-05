@@ -93,7 +93,7 @@ main()
   init();
   set_vector(80, int80h);
 
-  kfork("/bin/user1"); // Fork to process 1
+  kfork("/bin/user1", 0); // Fork to process 1
 
   printf("[KERNEL] P%d running.\n", running->pid);
   while(readyQueue)

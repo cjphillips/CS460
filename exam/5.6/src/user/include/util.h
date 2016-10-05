@@ -27,4 +27,6 @@ int exit();
 
 int _exit(int exitValue);
 
+int hop();
+
 #endif /* UTIL_H */

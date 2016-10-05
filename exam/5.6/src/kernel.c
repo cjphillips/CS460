@@ -98,39 +98,55 @@ void copyImage(u16 parentSeg, u16 childSeg, u16 size)
   }
 }
 
-PROC *kfork(char *filename)
+PROC *kfork(char *filename, u32 *seg)
 {
   int i, len;
   u16 segment;
   PROC *p;
 
-  printf("[KERNEL] Process [%d] attemping fork ... ", running->pid);
-  p = get_proc(&freeList);
-  if (!p)
+  if (!seg)
   {
-    printf("failed: No more available processes.\n");
-    return 0;
+    printf("[KERNEL] Process [%d] attemping fork ... ", running->pid);
+    p = get_proc(&freeList);
+    if (!p)
+    {
+      printf("failed: No more available processes.\n");
+      return 0;
+    }
+    printf("\n");
+
+    p->status = READY;
+    p->priority = 1;
+    p->ppid = running->pid;
+    p->parent = running;
+    nproc++;
+
+    /* Initialize the new proc's stack: */
+    for (i = 1; i < 10; i++)
+    {
+      p->kstack[SSIZE - i] = 0;
+    }
+
+    segment = (p->pid + 1) * 0x1000;
+
+    p->kstack[SSIZE - 1] = (int)body;
+    p->ksp = &(p->kstack[SSIZE - 9]);
+
+    p->usp = running->usp;
+    p->uss = segment;
+
+    printf("[KERNEL] Setting registers ... ");
+    set_registers(segment, running->usp, filename);
+    printf("done.\n");
+
+    enqueue(&readyQueue, p);
+
+    printf("[KERNEL] Success: Process [%d] forked at segment %x.\n", p->pid, segment);
   }
-  printf("\n");
-
-  p->status = READY;
-  p->priority = 1;
-  p->ppid = running->pid;
-  p->parent = running;
-  nproc++;
-
-  /* Initialize the new proc's stack: */
-  for (i = 1; i < 10; i++)
+  else
   {
-    p->kstack[SSIZE - i] = 0;
+    segment = *seg;
   }
-
-  segment = (p->pid + 1) * 0x1000;
-  p->kstack[SSIZE - 1] = (int)body;
-  p->ksp = &(p->kstack[SSIZE - 9]);
-
-  p->usp = running->usp;
-  p->uss = segment;
 
   if (filename)
   {
@@ -141,14 +157,6 @@ PROC *kfork(char *filename)
     }
   }
 
-  printf("[KERNEL] Setting registers ... ");
-  set_registers(segment, running->usp, filename);
-  printf("done.\n");
-
-  enqueue(&readyQueue, p);
-
-  printf("[KERNEL] Success: Process [%d] forked at segment %x.\n", p->pid, segment);
-
   nproc++;
   return p;
 }
@@ -158,7 +166,7 @@ int fork()
   int pid;
   u16 segment;
 
-  PROC *p = kfork(0);
+  PROC *p = kfork(0, 0);
   if (!p)
   {
     return -1;
@@ -216,4 +224,64 @@ int kexit(int exitValue)
   }
 
   tswitch(); // Give up the CPU
+}
+
+PROC *kfork_hop(u16 segment)
+{
+  int i, len;
+  PROC *p;
+
+  p = get_proc(&freeList);
+  if (!p)
+  {
+    printf("failed: No more available processes.\n");
+    return 0;
+  }
+
+  p->status = READY;
+  p->priority = 1;
+  p->ppid = running->pid;
+  p->parent = running;
+  nproc++;
+
+  /* Initialize the new proc's stack: */
+  for (i = 1; i < 10; i++)
+  {
+    p->kstack[SSIZE - i] = 0;
+  }
+
+  p->kstack[SSIZE - 1] = (int)body;
+  p->ksp = &(p->kstack[SSIZE - 9]);
+
+  p->usp = running->usp;
+  p->uss = segment;
+
+  set_registers(segment, running->usp, 0);
+
+  enqueue(&readyQueue, p);
+
+  nproc++;
+  return p;
+}
+
+int khop(u16 segment)
+{
+  int pid;
+
+  printf("[KERNEL] Attemping hop to segment %x ... ", segment);
+
+  kfork("/bin/user1", &segment);
+
+  copyImage(running->uss, segment, 32 * 1024); // Copy 32K words
+
+  running->uss = segment;
+
+  put_word(segment, segment, running->usp);       // DS
+  put_word(segment, segment, running->usp+2);     // ES
+  put_word(0,       segment, running->usp+2*8);   // AX
+  put_word(segment, segment, running->usp+2*10);  // CS
+
+  printf("done. Goodbye!\n");
+
+  tswitch();
 }

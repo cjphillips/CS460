@@ -1,11 +1,14 @@
 #include "include/user.h"
 
-char *cmds[] = { "ps", "chname", "fork", "exec", "switch", "wait", "exit", "menu" };
+char *cmds[] = { "ps", "chname", "fork", "exec", "switch", "wait", "exit", "menu", "hop" };
+
+char *table = "0123456789ABCDEF";
 
 int showMenu()
 {
   printf("<<---------------------------------------Menu--->>\n");
   printf(" ps, chname, fork, exec, switch, wait, exit, menu \n");
+  printf(" hop \n");
   printf("--------------------------------------------------\n");
 }
 
@@ -159,4 +162,19 @@ int exit()
 int _exit(int exitValue)
 {
   return syscall(6, exitValue, 0);
+}
+
+int hop()
+{
+  u16 segment;
+  char text[NAMESIZE];
+
+  printf("\nEnter the segment to hop to (ex: 3000): ");
+  gets(text);
+
+  segment = atoh(text);
+
+  printf("\nsegment = %x\n", segment);
+
+  syscall(10, segment);
 }
