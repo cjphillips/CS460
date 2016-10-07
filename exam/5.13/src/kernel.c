@@ -72,20 +72,27 @@ int kexec(char *command_line)
   put_word(0x0200,  segment, segment-2 - (2 + argsLength));
 }
 
-void set_registers(u16 segment, u16 offset)
+void set_registers(u16 segment, int offset)
 {
   int i, len;
 
-  for(i = 0; i < NUMREG - 1; i++)
+  for(i = 1; i < NUMREG; i++)
   {
     /* DI, SI, BP, DX, CX, BX, AX, PC=VA(0)*/
-    put_word(0, segment, offset + i * 2);
+    put_word(0, segment, offset - i * 2);
   }
 
+  put_word(segment, segment, offset - 24); // DS
+  put_word(segment, segment, offset - 22); // ES
+  put_word(segment, segment, offset - 4);  // CS
+  put_word(FLAG, segment, offset - 2);   // flag
+
+/*
   put_word(segment, segment, offset); // DS
   put_word(segment, segment, offset + 2); // ES
   put_word(segment, segment, offset + 20);  // CS
   put_word(FLAG, segment, offset + 22);   // flag
+  */
 }
 
 void copyImage(u16 parentSeg, u16 childSeg, u16 size)
@@ -100,7 +107,7 @@ void copyImage(u16 parentSeg, u16 childSeg, u16 size)
 
 PROC *kfork(char *filename)
 {
-  int i, len;
+  int i, len, high;
   u16 segment;
   PROC *p;
 
@@ -125,11 +132,14 @@ PROC *kfork(char *filename)
     p->kstack[SSIZE - i] = 0;
   }
 
-  segment = (p->pid + 1) * 0x1000;
+  segment = (p->pid - 1) * 0x800 + 0x2000;
+
+  high = segment + 0x800;
+
   p->kstack[SSIZE - 1] = (int)body;
   p->ksp = &(p->kstack[SSIZE - 9]);
 
-  p->usp = running->usp;
+  p->usp = high - 24;
   p->uss = segment;
 
   if (filename)
@@ -142,7 +152,7 @@ PROC *kfork(char *filename)
   }
 
   printf("[KERNEL] Setting registers ... ");
-  set_registers(segment, running->usp, filename);
+  set_registers(segment, high);
   printf("done.\n");
 
   enqueue(&readyQueue, p);
@@ -155,8 +165,7 @@ PROC *kfork(char *filename)
 
 int fork()
 {
-  int pid;
-  u16 segment;
+  int pid, high;
 
   PROC *p = kfork(0);
   if (!p)
@@ -164,16 +173,19 @@ int fork()
     return -1;
   }
 
-  segment = (p->pid + 1) * 0x1000;
-  copyImage(running->uss, segment, 32 * 1024); // Copy 32K words
+  copyImage(running->uss, p->uss, 16 * 1024); // Copy 32K words
 
-  p->uss = segment;
-  p->usp = running->usp;
+/*
+  put_word(p->uss, p->uss, high - 24);       // DS
+  put_word(p->uss, p->uss, high - 22);     // ES
+  put_word(0,       p->uss, high - 8);   // AX
+  put_word(p->uss, p->uss, high - 4);  // CS*/
 
-  put_word(segment, segment, p->usp);       // DS
-  put_word(segment, segment, p->usp+2);     // ES
-  put_word(0,       segment, p->usp+2*8);   // AX
-  put_word(segment, segment, p->usp+2*10);  // CS
+
+  put_word(p->uss, p->uss, p->usp);       // DS
+  put_word(p->uss, p->uss, p->usp+2);     // ES
+  put_word(0,       p->uss, p->usp+2*8);   // AX
+  put_word(p->uss, p->uss, p->usp+2*10);  // CS
 
   return p->pid;
 }

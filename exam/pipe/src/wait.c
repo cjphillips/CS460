@@ -3,7 +3,7 @@
 int ksleep(int event)
 {
   PROC *p;
-
+  printf("[KERNEL] Proc %d sleeping on event value %d.\n", running->pid, event);
   running->event = event;  // Record the event value in the running process's event field
   running->status = SLEEP; // Set the running process to SLEEP
   tswitch();               // Give up CPU to another process.
@@ -14,12 +14,15 @@ int kwakeup(int event)
   int i;
   PROC *p;
 
+  printf("[KERNEL] In wakeup with event value of %d.\n", event);
+
   for(i = 1; i < NPROC; i++) // Skip P0, not applicable to the origin process
   {
     p = &proc[i];
     if (p->status == SLEEP && p->event == event)
     {
-      p->event = 0;            // Cancel this event
+      printf("[KERNEL] Proc %d waking up. Had event value of %d.\n", p->pid, event);
+      p->event = -1;            // Cancel this event
       p->status = READY;       // Ensure that this process is ready to run again
       enqueue(&readyQueue, p);
     }

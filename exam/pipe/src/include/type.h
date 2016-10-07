@@ -21,7 +21,7 @@ typedef unsigned long  u32;
 #define NPIPE       10
 #define NOFT        20
 #define NFD         10
-#define PSIZE       32
+#define PSIZE       10
 
 #define FILE_LENGTH 64
 

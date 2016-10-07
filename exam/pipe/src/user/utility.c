@@ -144,7 +144,7 @@ int write()
 
 int read()
 {
-  int fd, count, pid;
+  int fd, count, pid, read, i;
   char text[BUFSIZE];
   pid = getpid();
 
@@ -160,7 +160,17 @@ int read()
     return -1;
   }
 
-  syscall(13, fd, text, count);
+  read = syscall(13, fd, text, count);
+
+  if (read > 0)
+  {
+    printf("[PROC %d] From pipe: ", pid);
+    for(i = 0; i < read; i++)
+    {
+      putc(text[i]);
+    }
+    printf("\n");
+  }
 }
 
 int pipe()

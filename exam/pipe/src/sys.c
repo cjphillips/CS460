@@ -43,6 +43,7 @@ int init()
     p = &proc[i];
     p->pid = i;
     p->ppid = 0;
+    p->event = -1;
     p->status = FREE;
     p->priority = 0;
     strcpy(proc[i].name, pname[i]);

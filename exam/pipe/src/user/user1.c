@@ -9,22 +9,22 @@ main(int argc, char *argv[])
 {
   char name[NAMESIZE];
   int pid, cmd, i = 0, *temp;
-  pid = getpid();
-  color = pid + 0x04;
 
   while(1)
   {
-    printf("------------------------------------------------------\n");
-    printf("[PROC %d - USER ONE CODE] in segment %x.\n", pid, getcs());
-    printf(" --> argc = %d\n", argc);
-    while(i < argc)
-    {
-      printf(" --> [%d] %s\n", i, argv[i]);
-      i++;
-    }
-    printf("------------------------------------------------------\n");
-
     do {
+      pid = getpid();
+      color = pid + 0x04;
+      printf("------------------------------------------------------\n");
+      printf("[PROC %d - USER ONE CODE] in segment %x.\n", pid, getcs());
+      printf(" --> argc = %d\n", argc);
+      while(i < argc)
+      {
+        printf(" --> [%d] %s\n", i, argv[i]);
+        i++;
+      }
+      printf("------------------------------------------------------\n");
+
       showMenu();
       printf("> ");
       gets(name);

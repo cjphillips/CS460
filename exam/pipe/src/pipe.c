@@ -4,13 +4,11 @@
 int show_pipe(PIPE *p)
 {
   int i, j;
-  printf("Head: %d\nTail: %d\nData: %dRoom: %d\nNr. Readers: %d\nNr. Writers: %d\n",
+  printf("Head: %d   Tail: %d   Data: %d   Room: %d\n",
     p->head,
     p->tail,
     p->data,
-    p->room,
-    p->nReader,
-    p->nWriter);
+    p->room);
 
   printf("<---------------------------------PIPE CONTENTS---->\n");
   for(i = 0, j = p->tail; i < p->data; i++, j++)
@@ -28,9 +26,9 @@ int _readBytes(PIPE *p, char *buf, int count)
 {
   int read = 0;
 
-  while(read < count && p->room != 0)
+  while(read < count && p->data != 0)
   {
-    put_word(p->buf[p->tail], running->uss, buf + read);
+    put_byte(p->buf[p->tail], running->uss, buf + read);
     (p->data)--;
     (p->tail)++;
     (p->room)++;
@@ -69,11 +67,11 @@ int read_pipe(int fd, char *buf, int count)
     return -3;
   }
 
-  printf("Before pipe read:\n");
-  show_pipe(p);
+  printf("[KERNEL] Attempting to read %d bytes ... \n", count);
 
   if (count <= 0)
   {
+    printf("success.\n");
     printf("After pipe read:\n");
     show_pipe(p);
     return 0;
@@ -83,6 +81,7 @@ int read_pipe(int fd, char *buf, int count)
   {
     while(p->data)
     {
+      show_pipe(p);
       read = _readBytes(p, buf, count);
       count -= read;
       if (count == 0) break;
@@ -91,7 +90,8 @@ int read_pipe(int fd, char *buf, int count)
     if (read)
     {
       /* some data has been read */
-      kwakeup(p->room);
+      printf("success: %d bytes read.\n", read);
+      kwakeup(p->data);
       printf("After pipe read:\n");
       show_pipe(p);
       return read;
@@ -100,11 +100,12 @@ int read_pipe(int fd, char *buf, int count)
     /* The pipe has no data */
     if (p->nWriter)
     {
+      printf("[KERNEL] Pipe empty; reader going to sleep.\n");
       /* If the pipe still has a writer,
          wakeup all writers.
          Then sleep for data. */
       kwakeup(p->room);
-      sleep(p->data);
+      ksleep(p->data);
       continue;
     }
 
@@ -160,10 +161,10 @@ int write_pipe(int fd, char *buf, int count)
     return -3;
   }
 
-  printf("buf = %s\n", buf);
-
   printf("Before pipe write:\n");
   show_pipe(p);
+
+  printf("[KERNEL] Attempting to write %d bytes ... \n", count);
 
   while(count)
   {
@@ -180,16 +181,18 @@ int write_pipe(int fd, char *buf, int count)
       if (!count) break;
     }
 
-    kwakeup(p->data);
-    if (count <= 0)
+    kwakeup(p->room);
+    if (count == 0)
     {
       printf("After pipe write:\n");
       show_pipe(p);
       return written;
     }
 
+    printf("[KERNEL] Writer sleeping; need more bytes.\n");
     /* Still has data to write but the pipe has no room */
-    sleep(p->room);
+    ksleep(p->room);
+    tswitch();
   }
 }
 

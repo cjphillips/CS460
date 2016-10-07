@@ -49,7 +49,7 @@ main(int argc, char *argv[])
 crt0(char *str)
 {
   int argc = 0;
-  printf("\n"); 
+  printf("\n");
   argc = tokenize(str);
 
   main(argc, args);
