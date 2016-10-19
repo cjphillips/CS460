@@ -1,0 +1,14 @@
+VFD=../../bin/mtximage
+MtxLib=../../lib/mtxlib
+BccLib=/usr/lib/bcc/libc.a
+
+echo Making $1 ...
+bcc -c -ansi $1.c utility.c io.c
+as86 -o user.o user.s
+ld86 -o $1 user.o $1.o utility.o io.o $MtxLib $BccLib
+
+sudo mount -o loop $VFD /mnt
+sudo cp $1 /mnt/bin/$1
+sudo umount /mnt
+
+rm *.o $1

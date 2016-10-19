@@ -4,10 +4,12 @@
 
 int (*fptr[ ])() = {ps, chname, fork, exec, kswitch, wait, exit, showMenu };
 
+int TimeSlice = 5;
+
 main(int argc, char *argv[])
 {
   char name[NAMESIZE];
-  int pid, cmd, i = 0, *temp;
+  int pid, i, j;
 
   while(1)
   {
@@ -15,34 +17,19 @@ main(int argc, char *argv[])
     color = pid + 0x04;
     printf("------------------------------------------------------\n");
     printf("[PROC %d - USER ONE CODE] in segment %x.\n", pid, getcs());
-    printf(" --> argc = %d\n", argc);
-    while(i < argc)
-    {
-      printf(" --> [%d] %s\n", i, argv[i]);
-      i++;
-    }
+    printf("[PROC %d] Processing for %d seconds\n", pid, TimeSlice);
     printf("------------------------------------------------------\n");
 
-    do {
-      showMenu();
-      printf("> ");
-      gets(name);
+    while(i < 100000)
+    {
+      while(j < 200)
+      {
+        j++;
+      }
+      i++;
+    }
 
-      if(!name[0])
-      {
-        continue;
-      }
-
-      cmd = findCmd(name);
-      if (cmd >= 0)
-      {
-        fptr[cmd]();
-      }
-      else
-      {
-        printf("\n\'%s\': command not recognized.\n", name);
-      }
-    } while(1);
+    printf("HERE!\n");
   }
 }
 

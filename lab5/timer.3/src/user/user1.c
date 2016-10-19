@@ -8,11 +8,11 @@ main(int argc, char *argv[])
 {
   char name[NAMESIZE];
   int pid, cmd, i = 0, *temp;
+  pid = getpid();
+  color = pid + 0x04;
 
   while(1)
   {
-    pid = getpid();
-    color = pid + 0x04;
     printf("------------------------------------------------------\n");
     printf("[PROC %d - USER ONE CODE] in segment %x.\n", pid, getcs());
     printf(" --> argc = %d\n", argc);
@@ -49,7 +49,7 @@ main(int argc, char *argv[])
 crt0(char *str)
 {
   int argc = 0;
-  printf("\n");
+  printf("\n"); 
   argc = tokenize(str);
 
   main(argc, args);

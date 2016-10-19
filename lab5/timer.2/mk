@@ -1,0 +1,41 @@
+VFD=bin/mtximage
+LIB=lib/mtxlib
+BCCLIB=/usr/lib/bcc/libc.a
+
+mkdir -p bin
+mkdir -p obj
+
+cp clean/mtximage bin/
+cp clean/loader.o obj/
+
+echo Making system binaries ...
+
+as86 -o obj/sys_asm.o src/sys_asm.s
+bcc -c -ansi src/*.c
+
+mv src/*.o obj
+
+ld86 -d -o bin/mtx obj/sys_asm.o obj/*.o $LIB $BCCLIB
+
+sudo mount -o loop $VFD /mnt
+sudo cp bin/mtx /mnt/boot
+sudo umount /mnt
+
+(cd src/user; mku user1);
+(cd src/user; mku user2);
+
+echo "qemu-system-i386 -fda $VFD -no-fd-bootchk" >> q
+chmod +x q
+
+echo Done.
+
+echo "#!/bin/bash" >> cln
+
+echo "sudo rm bin/*" >> cln
+echo "sudo rm obj/*" >> cln
+echo "sudo rmdir bin" >> cln
+echo "sudo rmdir obj" >> cln
+echo "sudo rm q" >> cln
+echo "sudo rm cln" >> cln
+
+chmod +x cln

@@ -245,5 +245,14 @@ int kexit(int exitValue)
     kwakeup(&proc[1]);
   }
 
+  /* Close the opened file descriptors */
+  for(i = 0; i < NFD; i++)
+  {
+    if (running->fd[i])
+    {
+      close_pipe(i);
+    }
+  }
+
   tswitch(); // Give up the CPU
 }
