@@ -1,9 +1,32 @@
-## CS 460 at Washington State University
-#### Fall 2016 - KC Wang
+# CS 460 at Washington State University (Fall 2016)
+-----------------------------------------------------------------------------
+### Contents
+- Booter
+	- Initialization of MTX. 
+	- Creates a boot program and dumps (dd) it into the boot segment.
+- Lab 1
+	- Implements process queues / lists for the uni-processor environment.
+	- kfork()
+	- tswitch()
+- Lab 2
+	- Modify tswitch()
+	- Push ds and ss registers onto the proc's stack as well.
+- Lab 3
+	- Splits User mode and Kernel mode.
+	- Each mode provides its own set of commands.
+		- All Umode commands are system calls to the kernel
+- Lab 4
+	- Implements exec
+	- Allows the user mode to fork a child process and execute another program
+		- Starts with user1 binary and can exec user2 binary.
+- Lab 5
+	- Implements the system's timer
+		- Uses interrupts to handle the clock and process timers
 
-##### Contents
-###### - Lab 1
-######* Lab 2
-###### *Lab 3
-######*Lab 4
-######-Lab 5
+- Exam
+	- 5.6
+		- Casanova problem from MTX textbook (implements hop(...))
+	- 5.13
+		- 64KB process are cut to 32KB processes to double the number of processes available
+	- Pipe
+		- Implments the inter-process communication system (piping)
