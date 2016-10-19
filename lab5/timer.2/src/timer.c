@@ -16,7 +16,7 @@
 
 u16 tick, second, minute, hour;
 
-char clock[8];
+char clock[8] = {'0','0',':','0','0',':','0','0'};
 
 extern u16 row, column;
 
@@ -98,14 +98,16 @@ int thandler()
   tick++;
   tick %= 60;
   if (tick == 0){                      // at each second
-    get_time();
-/*
-    printf("1 second timer interrupt in ");
-    running->inkmode > 1 ? putc('K') : putc('U');
-    printf("mode with inkmode = %d\n", running->inkmode);
-*/
+    //get_time();
+
+    printf("\ninkmode = %d\n", running->inkmode);
+    if (running->inkmode <= 1)
+    {
+      printf("\n[KERNEL] Process %d time: %d\n", running->pid, running->timep);
+      running->timep--;
+    }
   }
-  print_time();
+  //print_time();
 
   out_byte(0x20, 0x20);                // tell 8259 PIC EOI
 }

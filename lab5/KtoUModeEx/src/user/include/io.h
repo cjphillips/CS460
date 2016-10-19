@@ -5,8 +5,6 @@ int printf(char *fmt, ...);
 
 int atoi(char *str);
 
-char getc();
-
 void gets(char *str);
 
 #endif /* IO_H */

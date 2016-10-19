@@ -174,11 +174,6 @@ int atoi(char *str)
   return result;
 }
 
-char getc()
-{
-  return syscall(7, 0, 0, 0);
-}
-
 void gets(char *str)
 {
   int i = 0;
@@ -186,7 +181,7 @@ void gets(char *str)
 
   while(1)
   {
-    c = syscall(7, 0, 0, 0);
+    c = getc();
     printf("%c", c);
     if (c == '\r')
     {

@@ -33,7 +33,6 @@ typedef struct proc{
     struct proc *parent;
     int    priority;
     int    event;
-    int    timep;
     int    exitCode;
     char   name[NAMESIZE];           // name string of PROC
 
@@ -43,8 +42,6 @@ typedef struct proc{
 PROC proc[NPROC], *running, *freeList, *readyQueue, *sleepList;
 int procSize = sizeof(PROC);
 int nproc = 0;
-
-int TimeSlice = 5;
 
 char *pname[] = {
   "Sun", "Mercury", "Venus", "Earth",  "Mars", "Jupiter",

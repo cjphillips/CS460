@@ -16,7 +16,7 @@
 
 u16 tick, second, minute, hour;
 
-char clock[8] = {'0','0',':','0','0',':','0','0'};
+char clock[8];
 
 extern u16 row, column;
 
@@ -98,9 +98,14 @@ int thandler()
   tick++;
   tick %= 60;
   if (tick == 0){                      // at each second
-    get_time();
+    //get_time();
+
+    printf("1 second timer interrupt in ");
+    running->inkmode > 1 ? putc('K') : putc('U');
+    printf("mode\n");
+
   }
-  print_time();
+//  print_time();
 
   out_byte(0x20, 0x20);                // tell 8259 PIC EOI
 }

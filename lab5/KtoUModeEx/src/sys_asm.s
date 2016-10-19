@@ -25,6 +25,8 @@ start:	mov  ax,cs
 
 	call _main
 
+idle:   jmp idle
+
 _tswitch:
 SAVE:
         cli
@@ -92,7 +94,7 @@ INK =   8
           mov  es,di            ! CS=DS=SS=ES in Kmode
           mov  ss,di
 
-          mov  sp,_running      ! sp -> running's kstack[] high end
+          mov  sp,_running
           add  sp,_procSize
 
 ?1:       call  _?1             ! call handler in C
