@@ -10,6 +10,7 @@
 /*#include "include/wait.h"*/
 /*#include "include/kernel.h"*/
 #include "include/int.h"
+#include "include/timer.h"
 
 static char *ucode = "/bin/user1";
 
@@ -127,20 +128,29 @@ int kkexit(int exitValue)
   return kexit(exitValue);
 }
 
+int kitimer(int timec)
+{
+  printf("[KERNEL] Inserting a %dsec timeout for process %d.\n",
+   timec, running->pid);
+
+  return itimer(timec);
+}
+
 char *getSyscallName(int value)
 {
   switch(value)
   {
-    case 0: return "getpid";
-    case 1: return "ps";
-    case 2: return "chname";
-    case 3: return "fork";
-    case 4: return "switch";
-    case 5: return "wait";
-    case 6: return "exit";
-    case 7: return "getc";
-    case 8: return "putc";
-    case 9: return "exec";
+    case 0:  return "getpid";
+    case 1:  return "ps";
+    case 2:  return "chname";
+    case 3:  return "fork";
+    case 4:  return "switch";
+    case 5:  return "wait";
+    case 6:  return "exit";
+    case 7:  return "getc";
+    case 8:  return "putc";
+    case 9:  return "exec";
+    case 10: return "itimer";
     default: return "Invalid syscall.";
   }
 }
@@ -168,20 +178,21 @@ int kcinth()
 
   switch(a)
   {
-    case 0: r = kgetpid();    break;
-    case 1: r = kps();        break;
-    case 2: r = kchname(b);   break;
-    case 3: r = kkfork();     break;
-    case 4: r = ktswitch();   break;
-    case 5: r = kkwait(b);    break;
-    case 6: r = kkexit(b);    break;
-    case 7: r = kgetc();      break;
-    case 8: r = kputc(b, c);  break;
-    case 9: r = kkexec(b);    break;
+    case 0:  r = kgetpid();    break;
+    case 1:  r = kps();        break;
+    case 2:  r = kchname(b);   break;
+    case 3:  r = kkfork();     break;
+    case 4:  r = ktswitch();   break;
+    case 5:  r = kkwait(b);    break;
+    case 6:  r = kkexit(b);    break;
+    case 7:  r = kgetc();      break;
+    case 8:  r = kputc(b, c);  break;
+    case 9:  r = kkexec(b);    break;
+    case 10: r = kitimer(b);   break;
     default: printf("[KERNEL] Invalid syscall.\n", a); r = -1; break;
   }
 
-  if (a != 0 && a != 7 && a != 8 && (a == 9 && r < 0))
+  if (a != 0 && a != 7 && a != 8 && a != 9)
   {
     /* Just to avoid printing redundant getPid, getc, and putc syscalls */
     printf("[KERNEL] Syscall returning with a value of %d.\n", r);

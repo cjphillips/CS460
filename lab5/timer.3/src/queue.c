@@ -1,5 +1,138 @@
 #include "include/type.h"
 
+int tqueuecleared = 0;
+
+void print_tqueue(TQE *t)
+{
+  int hit = 0;
+
+  if (t)
+  {
+    hit = 1;
+    printf("[TQUEUE]: [P%d- %d]", t->pproc->pid, t->time);
+    t = t->next;
+  }
+
+  while(t)
+  {
+    printf(" -> [P%d- %d]", t->pproc->pid, t->time);
+    t = t->next;
+  }
+
+  if(hit)
+  {
+    printf("\n");
+  }
+
+  if (tqueuecleared)
+  {
+    printf("[TQUEUE]: All timers cleared.\n");
+    tqueuecleared = 0;
+  }
+}
+
+TQE *get_timer(TQE **list)
+{
+  TQE *p = *list, *q = 0;
+
+  while(p)
+  {
+    if (p->pproc == 0)
+    {
+      if (!q)
+      {
+        *list = (*list)->next;
+        p->next = 0;
+        return p;
+      }
+
+      q->next = p->next;
+      p->next = 0;
+      return p;
+    }
+
+    q = p;
+    p = p->next;
+  }
+
+  return 0;
+}
+
+TQE *clear_timer(TQE **queue)
+{
+  TQE *t = *queue;
+  if (t)
+  {
+    *queue = (*queue)->next;
+    t->next = 0;
+  }
+
+  if (!*queue)
+  {
+    tqueuecleared = 1;
+  }
+
+  return t;
+}
+
+int set_timer(TQE **queue, int timec)
+{
+  TQE *tp = *queue, *tprev = 0, *t = 0;
+  int accum = 0;
+
+  t = get_timer(&tlist);
+  if (!t)
+  {
+    return -1;
+  }
+
+  if (!tp)
+  {
+    /* Empty timer queue */
+    *queue = t;
+    (*queue)->time = timec;
+    (*queue)->pproc = &proc[running->pid];
+    (*queue)->action = 0;
+    return 0;
+  }
+
+  printf("timer queue not empty.\n");
+  while(tp)
+  {
+    if (accum + tp->time > timec)
+    {
+      printf("HERE\n");
+      break;
+    }
+
+    accum += tp->time;
+    tprev = tp;
+    tp = tp->next;
+  }
+
+  t->time = timec - accum;
+  t->pproc = &proc[running->pid];
+  t->action = 0;
+
+  if (tprev)
+  {
+    tprev->next = t;
+    t->next = tp;
+  }
+  else
+  {
+    t->next = *queue;
+    *queue = t;
+  }
+
+  if (t->next)
+  {
+    t->next->time -= t->time;
+  }
+
+  return 0;
+}
+
 PROC *get_proc(PROC **list)
 {
   PROC *p = *list, *q = 0;

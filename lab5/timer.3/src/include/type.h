@@ -39,7 +39,16 @@ typedef struct proc{
     int    kstack[SSIZE];      // per proc stack area
 }PROC;
 
+typedef struct tqe {
+  struct tqe   *next;  // Next timer pointer
+  int           time;  // Requested time
+  struct proc  *pproc;  // Pointer to the calling process
+  int (*action) ();    // Function pntr handlers (0: wakeup, 1: notify)
+}TQE;
+
 PROC proc[NPROC], *running, *freeList, *readyQueue, *sleepList;
+TQE tqe[NPROC], *tq, *tlist;
+
 int procSize = sizeof(PROC);
 int nproc = 0;
 

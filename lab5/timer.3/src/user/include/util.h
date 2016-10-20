@@ -25,6 +25,8 @@ int wait();
 
 int exit();
 
+int itimer();
+
 int _exit(int exitValue);
 
 #endif /* UTIL_H */

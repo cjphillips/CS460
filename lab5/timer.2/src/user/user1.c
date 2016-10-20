@@ -9,19 +9,20 @@ int TimeSlice = 5;
 main(int argc, char *argv[])
 {
   char name[NAMESIZE];
-  int pid;
+  int pid, cs;
   long i, j;
 
   pid = getpid();
+  cs = getcs();
   color = pid + 0x04;
-  printf("------------------------------------------------------\n");
-  printf("[PROC %d - USER ONE CODE] in segment %x.\n", pid, getcs());
-  printf("------------------------------------------------------\n");
 
   while(1)
   {
+    printf("------------------------------------------------------\n");
+    printf("[PROC %d - USER ONE CODE] in segment %x.\n", pid, cs);
+    printf("------------------------------------------------------\n");
     i = j = 0;
-    
+
     while(i < 9000000)
     {
       while(j < 500000)

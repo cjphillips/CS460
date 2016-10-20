@@ -1,12 +1,12 @@
 #include "include/user.h"
 
-char *cmds[] = { "ps", "chname", "fork", "exec", "switch", "wait", "exit", "menu" };
+char *cmds[] = { "ps", "chname", "fork", "exec", "switch", "wait", "exit", "itimer", "menu" };
 
 int showMenu()
 {
-  printf("<<---------------------------------------Menu--->>\n");
-  printf(" ps, chname, fork, exec, switch, wait, exit, menu \n");
-  printf("--------------------------------------------------\n");
+  printf("<<-----------------------------------------------Menu--->>\n");
+  printf(" ps, chname, fork, exec, switch, wait, exit, itimer, menu \n");
+  printf("----------------------------------------------------------\n");
 }
 
 int findCmd(char *command)
@@ -60,6 +60,18 @@ int tokenize(char *s)
 int getpid()
 {
   return syscall(0, 0, 0);
+}
+
+itimer()
+{
+  int timec;
+  int pid = getpid();
+
+  printf("\n[PROC %d] Enter an timeout value: ", pid);
+  timec = geti();
+  printf("%d\n", timec);
+  
+  return syscall(10, timec, 0, 0);
 }
 
 int ps()

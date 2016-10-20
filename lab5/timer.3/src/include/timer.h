@@ -5,4 +5,6 @@ int timer_init();
 
 int thandler();
 
+int itimer(int timec);
+
 #endif /* TIMER_H */

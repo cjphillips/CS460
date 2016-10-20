@@ -1,5 +1,7 @@
 #include "include/type.h"
 #include "include/vid.h"
+#include "include/queue.h"
+#include "include/wait.h"
 
 #define LATCH_COUNT     0x00	   /* cc00xxxx, c = channel, x = any */
 #define SQUARE_WAVE     0x36	   /* ccaammmb, a = access, m = mode, b = BCD */
@@ -29,14 +31,58 @@ int enable_irq(u16 irq_nr)
 int timer_init()
 {
   /* Initialize channel 0 of the 8253A timer to e.g. 60 Hz. */
-
+  long t = localtime() + 11400;
   printf("Initializing timer ... ");
-  tick = second = minute = hour = 0;
+
+  tick = 0;
+
+  hour = (t / 3600) % 24;
+  minute = t % 60;
+  second = (t / 60) % 60;
+
   out_byte(TIMER_MODE, SQUARE_WAVE);	// set timer to run continuously
   out_byte(TIMER0, TIMER_COUNT);	// timer count low byte
   out_byte(TIMER0, TIMER_COUNT >> 8);	// timer count high byte
   enable_irq(TIMER_IRQ);
   printf("done.\n");
+}
+
+int update()
+{
+  TQE *cleared;
+
+  if (!tq)
+  {
+    /* Queue is empty */
+    return 0;
+  }
+
+  tq->time--;
+  if (tq->time == 0)
+  {
+    cleared = clear_timer(&tq);
+    kwakeup(cleared->pproc->pid);
+  }
+}
+
+int itimer(int timec)
+{
+  printf("[KERNEL] In ITIMER\n");
+
+  lock();
+  if (set_timer(&tq, timec) < 0)
+  {
+    printf("[KERNEL] Error setting timer value.\n");
+    unlock();
+    return -2;
+  }
+
+  printf("[KERNEL] Timer successfully set.\n");
+  unlock();
+
+  ksleep(running->pid);
+
+  return 0;
 }
 
 void print_time()
@@ -99,11 +145,8 @@ int thandler()
   tick %= 60;
   if (tick == 0){                      // at each second
     get_time();
-/*
-    printf("1 second timer interrupt in ");
-    running->inkmode > 1 ? putc('K') : putc('U');
-    printf("mode with inkmode = %d\n", running->inkmode);
-*/
+    update();
+    print_tqueue(tq);
   }
   print_time();
 

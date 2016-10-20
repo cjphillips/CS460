@@ -36,6 +36,7 @@ int body()
 int init()
 {
   PROC *p;
+  TQE  *t;
   int i;
 
   printf("[KERNEL] Initializing processes ... ");
@@ -43,6 +44,8 @@ int init()
   for(i = 0; i < NPROC; i++)
   {
     p = &proc[i];
+    t = &tqe[i];
+
     p->pid = i;
     p->ppid = 0;
     p->status = FREE;
@@ -50,7 +53,15 @@ int init()
     strcpy(proc[i].name, pname[i]);
     p->next = &proc[i + 1];
     p->inkmode = 1;
+
+    t->next = &tqe[i + 1];
+    t->time = 0;
+    t->pproc = 0;
   }
+
+  tq = 0;
+  tlist = &tqe[0];
+  tqe[NPROC -1].next = 0;
 
   freeList = &proc[0];
   proc[NPROC - 1].next = 0;
