@@ -18,6 +18,11 @@ int kgetpid()
   return running->pid;
 }
 
+int kgetppid()
+{
+  return running->ppid;
+}
+
 int kps()
 {
   int i;
@@ -147,6 +152,7 @@ char *getSyscallName(int value)
     case 8: return "putc";
     case 9: return "exec";
     case 10: return "time";
+    case 11: return "getppid";
     default: return "Invalid syscall.";
   }
 }
@@ -166,7 +172,7 @@ int kcinth()
   c = get_word(segment, offset + 30);
   d = get_word(segment, offset + 32);
 
-  if (a != 0 && a != 7 && a != 8 && a != 10)
+  if (a != 0 && a != 7 && a != 8 && a != 10 && a != 11)
   {
     /* Just to avoid printing redundant getPid, getc, and putc syscalls */
     printf("[KERNEL] Processing syscall: \'%s\' \n", getSyscallName(a));
@@ -185,10 +191,11 @@ int kcinth()
     case 8:  r = kputc(b, c);  break;
     case 9:  r = kkexec(b);    break;
     case 10: r = kgettime();   break;
+    case 11: r = kgetppid();   break;
     default: printf("[KERNEL] Invalid syscall.\n", a); r = -1; break;
   }
 
-  if (a != 0 && a != 7 && a != 8 && (a == 9 && r < 0) && a != 10)
+  if (a != 0 && a != 7 && a != 8 && (a == 9 && r < 0) && a != 10 && a != 11)
   {
     /* Just to avoid printing redundant getPid, getc, and putc syscalls */
     printf("[KERNEL] Syscall returning with a value of %d.\n", r);

@@ -3,7 +3,7 @@
 #include "include/wait.h"
 
 #define NUMREG 13
-#define FLAG   0x0020
+#define FLAG   0x0200
 
 extern int body();
 

@@ -9,27 +9,24 @@ int TimeSlice = 5;
 main(int argc, char *argv[])
 {
   char name[NAMESIZE];
-  int pid, cs;
+  int pid, ppid;
   long i, j;
-
-  pid = getpid();
-  cs = getcs();
-  color = pid + 0x04;
 
   while(1)
   {
-    printf("------------------------------------------------------\n");
-    printf("[PROC %d - USER ONE CODE] in segment %x.\n", pid, cs);
-    printf("------------------------------------------------------\n");
+    pid = getpid();
+    ppid = getppid();
+    color = pid + 0x04;
     i = j = 0;
-
-    while(i < 9000000)
+    printf("------------------------------------------------------\n");
+    printf("[PROC %d (PPID: %d)]\n", pid, ppid);
+    printf("------------------------------------------------------\n\n\n");
+    while(1)
     {
-      while(j < 500000)
+      while(i++ < 999999)
       {
-        j++;
+        while(j++ < 100000);
       }
-      i++;
     }
   }
 }

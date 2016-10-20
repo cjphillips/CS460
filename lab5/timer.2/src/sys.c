@@ -8,9 +8,6 @@ int body()
     char c;
     color = 0x02;
 
-    /* For this exercise, just jump straight to Umode... */
-    goUmode();
-
     printf("[KERNEL] P%d running.\n", running->pid);
 
     printf("---------------------------------------------------------------\n");
@@ -18,6 +15,8 @@ int body()
     printQueue("Ready Queue :", readyQueue);
     printSleep();
     printf("---------------------------------------------------------------\n\n");
+    /* For this exercise, just jump straight to Umode... */
+    goUmode();
     do
     {
        printf("[s|f|w|q|u]: ");
@@ -53,7 +52,7 @@ int init()
     strcpy(proc[i].name, pname[i]);
     p->next = &proc[i + 1];
     p->inkmode = 1;
-    p->timep = 0;
+    p->timep = -1;
   }
 
   freeList = &proc[0];
@@ -103,19 +102,19 @@ main()
   vid_init();
   color = 0x04;
   printf("\n\nWelcome! Starting in MTX kernel.\n\n");
+  lock();
   init();
   set_vector(80, int80h);
+  set_vector(8, tinth);
+  timer_init();
 
   printf("Forking P1, P2, P3, P4 ... ");
-  kfork("/bin/user1");
-  kfork("/bin/user1");
-  kfork("/bin/user1");
+  if (!kfork("/bin/user1")) { __exit(0); }
+  if (!kfork("/bin/user1")) { __exit(0); }
+  if (!kfork("/bin/user1")) { __exit(0); }
   if (kfork("/bin/user1")) // Fork to process 1
   {
     printf("done.\n");
-    lock();
-    set_vector(8, tinth);
-    timer_init();
 
     printf("[KERNEL] P%d running.\n", running->pid);
     while(readyQueue)

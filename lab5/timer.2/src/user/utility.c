@@ -62,6 +62,11 @@ int getpid()
   return syscall(0, 0, 0);
 }
 
+int getppid()
+{
+  return syscall(11, 0, 0, 0);
+}
+
 int ps()
 {
   return syscall(1, 0, 0);

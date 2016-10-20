@@ -1,7 +1,0 @@
-#!/bin/bash
-sudo rm bin/*
-sudo rm obj/*
-sudo rmdir bin
-sudo rmdir obj
-sudo rm q
-sudo rm cln

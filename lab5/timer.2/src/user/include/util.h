@@ -9,6 +9,8 @@ int findCmd(char *command);
 
 int getpid();
 
+int getppid();
+
 int ps();
 
 int chname();

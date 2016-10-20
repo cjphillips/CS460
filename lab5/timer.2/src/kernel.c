@@ -2,10 +2,12 @@
 #include "include/queue.h"
 #include "include/wait.h"
 
-#define NUMREG 13
-#define FLAG   0x0020
+#define NUMREG     13
+#define FLAG   0x0200
 
 extern int body();
+
+extern int goUmode();
 
 int strlen(char *s)
 {
@@ -126,7 +128,7 @@ PROC *kfork(char *filename)
   }
 
   segment = (p->pid + 1) * 0x1000;
-  p->kstack[SSIZE - 1] = (int)body;
+  p->kstack[SSIZE - 1] = (int)goUmode;
   p->ksp = &(p->kstack[SSIZE - 9]);
 
   p->usp = running->usp;
