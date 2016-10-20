@@ -11,14 +11,14 @@
 #define TIMER_MODE   0x43
 #define TIMER_IRQ       0
 
-#define CLOCK_POS_ROW   0
+#define CLOCK_POS_ROW   24
 #define CLOCK_POS_COL   70
 
 u16 tick, second, minute, hour;
 
 char clock[8] = {'0','0',':','0','0',':','0','0'};
 
-extern u16 row, column;
+extern u16 row, column, scroll_amount;
 
 int enable_irq(u16 irq_nr)
 {
@@ -29,9 +29,15 @@ int enable_irq(u16 irq_nr)
 int timer_init()
 {
   /* Initialize channel 0 of the 8253A timer to e.g. 60 Hz. */
-
+  long t = localtime() + 11400;
   printf("Initializing timer ... ");
-  tick = second = minute = hour = 0;
+
+  tick = 0;
+
+  hour = (t / 3600) % 24;
+  minute = t % 60;
+  second = (t / 60) % 60;
+  
   out_byte(TIMER_MODE, SQUARE_WAVE);	// set timer to run continuously
   out_byte(TIMER0, TIMER_COUNT);	// timer count low byte
   out_byte(TIMER0, TIMER_COUNT >> 8);	// timer count high byte
@@ -44,15 +50,32 @@ void print_time()
   int i;
   u16 old_row, old_col;
 
-
+  /* Store the current row and column */
   old_row = row;
   old_col = column;
+
+  /* Determine if a scroll operation has occurred */
+  if (scroll_amount > 0)
+  {
+    row = CLOCK_POS_ROW - scroll_amount;
+    column = CLOCK_POS_COL;
+    for(i = 0; i < 8; i++)
+    {
+      /* Clear out the old clock */
+      putc(' ');
+    }
+
+    scroll_amount = 0;
+  }
+
+  /* Change cursor to the clock's position */
   row = CLOCK_POS_ROW;
   column = CLOCK_POS_COL;
   for(i = 0; i < 8; i++)
   {
     putc(clock[i]);
   }
+
   row = old_row;
   column = old_col;
 

@@ -13,14 +13,14 @@
 #define TIMER_MODE   0x43
 #define TIMER_IRQ       0
 
-#define CLOCK_POS_ROW   0
+#define CLOCK_POS_ROW   24
 #define CLOCK_POS_COL   70
 
 u16 tick, second, minute, hour;
 
 char clock[8];
 
-extern u16 row, column;
+extern u16 row, column, scroll_amount;
 
 int enable_irq(u16 irq_nr)
 {
@@ -90,15 +90,32 @@ void print_time()
   int i;
   u16 old_row, old_col;
 
-
+  /* Store the current row and column */
   old_row = row;
   old_col = column;
+
+  /* Determine if a scroll operation has occurred */
+  if (scroll_amount > 0)
+  {
+    row = CLOCK_POS_ROW - scroll_amount;
+    column = CLOCK_POS_COL;
+    for(i = 0; i < 8; i++)
+    {
+      /* Clear out the old clock */
+      putc(' ');
+    }
+
+    scroll_amount = 0;
+  }
+
+  /* Change cursor to the clock's position */
   row = CLOCK_POS_ROW;
   column = CLOCK_POS_COL;
   for(i = 0; i < 8; i++)
   {
     putc(clock[i]);
   }
+
   row = old_row;
   column = old_col;
 

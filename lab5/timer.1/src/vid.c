@@ -23,9 +23,10 @@ u16 base     = 0xB800;    // VRAM base address
 u16 vid_mask = 0x3FFF;    // mask=Video RAM size - 1
 
 u16 offset;               // offset from VRAM base
-extern int color;                // atttirbute byte
+extern int color;         // atttirbute byte
 u16 org;                  // current display origin r.e.VRAM base
 u16 row, column;          // logical row, col position
+u16 scroll_amount;
 
 int vid_init()
 {
@@ -42,6 +43,8 @@ int vid_init()
   for (i=0; i<25*80; i++){
     put_word(w, base, 0+2*i);         // write 24*80 blanks to VGA memory
   }
+
+  scroll_amount = 0;
 }
 
 int move_cursor()
@@ -49,6 +52,19 @@ int move_cursor()
   int pos = 2 * (row *80 + column);
   offset = (org + pos) & vid_mask;
   set_VDC(CURSOR, offset >> 1);
+}
+
+int clear_clock_zone(u16 col_start)
+{
+  u16 i, j;
+
+  for(i = 0; i < SCR_LINES; i++)
+  {
+    for(j = col_start; j < 8; j++)
+    {
+      put_word(' ', j, i);
+    }
+  }
 }
 
 int scroll()
@@ -86,6 +102,7 @@ int scroll()
 
   set_VDC(VID_ORG, org >> 1);	  /// 6845 thinks in words
 
+  scroll_amount++;
 }
 
 int putc(char c)

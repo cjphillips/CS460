@@ -26,6 +26,7 @@ u16 offset;               // offset from VRAM base
 extern int color;                // atttirbute byte
 u16 org;                  // current display origin r.e.VRAM base
 u16 row, column;          // logical row, col position
+u16 scroll_amount;
 
 int vid_init()
 {
@@ -42,6 +43,8 @@ int vid_init()
   for (i=0; i<25*80; i++){
     put_word(w, base, 0+2*i);         // write 24*80 blanks to VGA memory
   }
+
+  scroll_amount = 0;
 }
 
 int move_cursor()
@@ -86,6 +89,7 @@ int scroll()
 
   set_VDC(VID_ORG, org >> 1);	  /// 6845 thinks in words
 
+  scroll_amount++;
 }
 
 int putc(char c)
