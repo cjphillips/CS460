@@ -1,3 +1,6 @@
+#ifndef TYPE_H
+#define TYPE_H
+
 #define NULL       0
 #define NPROC     17
 #define NTHREAD   16
@@ -5,13 +8,19 @@
 #define NSIG      16
 
 #define FREE       0   /* PROC status */
-#define READY      1 
+#define READY      1
 #define SLEEP      2
 #define ZOMBIE     3
 #define BLOCK      4
 #define PAUSE      5
 
+#define BUFSIZE    1024
 #define BLOCK_SIZE 1024
+#define NAME_LENGTH 256
+
+#define RDONLY   0
+#define WRONLY   1
+#define ERROR      2
 
 typedef unsigned long  u32;
 typedef unsigned short u16;
@@ -52,7 +61,7 @@ typedef struct ext2_super_block {
 	 * the incompatible feature set is that if there is a bit set
 	 * in the incompatible feature set that the kernel doesn't
 	 * know about, it should refuse to mount the filesystem.
-	 * 
+	 *
 	 * e2fsck's requirements are more strict; if it doesn't know
 	 * about a feature in either the compatible or incompatible
 	 * feature set, it must abort and not try to meddle with
@@ -145,18 +154,18 @@ typedef struct Oft{
 /******************** KCW on MINODE *******************
  refCount = # of procs using this MINODE
  lock is a semaphore for exclusive access to this MINODE
-              WHY lock? 
- When a proc issues disk I/O on a MINODE, it may gets 
+              WHY lock?
+ When a proc issues disk I/O on a MINODE, it may gets
  blocked while waiting for disk completion interrupt =>
- another proc may find the same MINODE and proceed to 
+ another proc may find the same MINODE and proceed to
  use it (before fully loaded) OR (even worse!) modify it.
  Hence the need of a lock.
- Unix uses a "locked" flag to sleep/wakeup. 
+ Unix uses a "locked" flag to sleep/wakeup.
  MTX uses a semaphore in each MINODE
 *****************************************************/
 
-typedef struct Minode{		
-  INODE    INODE; 
+typedef struct Minode{
+  INODE    INODE;
   int      dev, ino;
   int      refCount;
   int      dirty;
@@ -169,13 +178,13 @@ typedef struct Minode{
 typedef struct Mount{
         int    ninodes;
         int    nblocks;
-        int    dev, busy;   
+        int    dev, busy;
         struct Minode *mounted_inode;
-        char   name[32]; 
+        char   name[32];
         char   mount_name[32];
         // mounted dev's map & inodes_block numbers
         // although all EXT2 FS, these values may be different PER device
-        int    BMAP,IMAP,IBLOCK; 
+        int    BMAP,IMAP,IBLOCK;
 } MOUNT;
 
 typedef struct pipe{
@@ -220,7 +229,7 @@ typedef struct stty {
    struct semaphore outspace;
    char kline[LSIZE];
    int tx_on;
-   
+
    /* echo buffer */
    char ebuf[EBUFLEN];
    int ehead, etail, e_count;
@@ -229,7 +238,7 @@ typedef struct stty {
    char echo;   /* echo inputs */
    char ison;   /* on or off */
    char erase, kill, intr, quit, x_on, x_off, eof;
-   
+
    /* I/O port base address */
    int port;
    char *tty;
@@ -244,12 +253,12 @@ typedef struct pres{
 
    u16  segment, tsize, dsize, size;
 
-   MINODE *cwd;              // CWD 
+   MINODE *cwd;              // CWD
    char    name[32];
 
    char    tty[16];          // opened /dev/ttyXX
    int     tcount;           // process tcount
-   u16     signal;           // 15 signals=bits 1 to 14   
+   u16     signal;           // 15 signals=bits 1 to 14
    u16     sig[NSIG];        // 15 signal handlers
    OFT     *fd[NFD];         // open file descriptors
 
@@ -260,11 +269,11 @@ typedef struct pres{
 
 typedef struct proc{
         struct  proc *next;
-        int    *ksp; 
+        int    *ksp;
         int     inkmode;
         int     uss,usp;
 
-        
+
         int     pid;
         int     ppid;
         int     uid;
@@ -279,17 +288,17 @@ typedef struct proc{
         int     time;
         int     cpu;           // CPU time ticks used in ONE second
         int     type;          // PROCESS|THREAD
- 
+
   struct proc  *parent;
   struct proc  *proc;          // process ptr
   struct pres  *res;           // resource struct ptr
   struct semaphore *sem;       // ptr to semaphore currently BLOCKed on
 
   int kstack[SSIZE];
-}PROC;        
+}PROC;
 
 /* Default dir and regulsr file modes */
-#define DIR_MODE          0040777 
+#define DIR_MODE          0040777
 #define FILE_MODE         0100644
 #define SUPER_MAGIC       0xEF53
 #define SUPER_USER        0
@@ -305,9 +314,9 @@ struct devtab{
   struct buf *io_queue;
 };
 
-struct hd {		
-  ushort   opcode;		
-  ushort   drive;	
+struct hd {
+  ushort   opcode;
+  ushort   drive;
   ulong    start_sector;
   ulong    size;               // size in number of sectors
 };
@@ -333,7 +342,7 @@ struct buf{
   int opcode;             // READ | WRITE
   int dev,blk;
 
-  /********* these status variables could be changed to bits **********/  
+  /********* these status variables could be changed to bits **********/
   int dirty;
   int busy;
   int async;              //ASYNC write flag
@@ -366,3 +375,5 @@ typedef struct mbuf{
   int sender;
   char contents[128];
 } MBUF;
+
+#endif /* TYPE_H */

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+rm log.txt
+rm -rf lib bin
+sudo umount /mnt

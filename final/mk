@@ -1,0 +1,155 @@
+#!/bin/bash
+
+declare -a BINARIES=(
+    'test'
+    'init'
+    'login'
+    'sh'
+)
+
+declare -a ACCOUNTS=(
+    'colin:scout:4:4:Colin Phillips:/user/colin:sh'
+    'savannah:peridot:5:4:Savannah Voorheis:/user/savannah:sh'
+    'steve:hargett:6:5:Steve Hargett:/user/steve:sh'
+)
+
+LOG='log.txt'
+
+mkdir -p bin
+mkdir -p lib
+
+DISK=bin/vdisk
+LIB=lib/mtxlib
+BCCLIB=/usr/lib/bcc/libc.a
+TABLE=bin/ptable
+PARTITION=1
+
+echo "Locating necessary files: "
+
+echo -n " ---> vdisk ....... "
+cp clean/vdisk $DISK
+if [ $? -ne 0 ]; then
+    exit
+fi
+echo found.
+
+echo -n " ---> mtxlib ...... "
+cp clean/mtxlib $LIB
+if [ $? -ne 0 ]; then
+    exit
+fi
+echo found.
+
+echo -n " ---> ptable ...... "
+cp clean/ptable $TABLE
+if [ $? -ne 0 ]; then
+   exit
+fi
+echo found.
+
+echo "Building arguments: "
+
+if [ $# -gt 0 ]; then
+    PARTITION=$1
+fi
+
+SECTOR=$($TABLE $DISK $PARTITION)
+if [ $? -eq 0 ]; then
+    echo failed: could not determine partition \(check ptable binary\).
+    exit
+fi
+
+OFFSET=$(expr $SECTOR \* 512)
+
+echo " ---> Partition ... $PARTITION"
+echo " ---> Sector ...... $SECTOR"
+echo " ---> Offset ...... $OFFSET"
+
+echo -n "Mounting virtual disk ... "
+sudo mount -o loop,offset=$OFFSET $DISK /mnt
+
+if [ $? -ne 0 ]; then
+    exit
+fi
+
+echo Done.
+
+for exe in "${BINARIES[@]}"
+do
+    echo \<\<\<\<\< $exe \>\>\>\>\> >> $LOG
+
+    echo -n "Compiling $exe.c ... "
+    as86 -o bin/u.o src/users/u.s &>> $LOG
+    if [ $? -ne 0 ]; then
+	echo Error: see $LOG
+	exit
+    fi
+
+    bcc -c -ansi -o bin/$exe.o src/$exe.c &>> $LOG
+    if [ $? -ne 0 ]; then
+	echo Error: see $LOG
+	exit
+    fi
+    echo Done.
+
+    echo -n "Linking to compiled targets ... "
+    ld86 bin/u.o bin/$exe.o $LIB $BCCLIB &>> $LOG
+    if [ $? -ne 0 ]; then
+	echo Error: see $LOG
+	exit
+    fi
+    echo Done.
+
+    echo -n "Dumping \"$exe\" into the vitrual disk at /bin/$exe ... "
+    sudo cp -av a.out /mnt/bin/$exe &>> $LOG
+    if [ $? -ne 0 ]; then
+	echo Error: see $LOG
+	exit
+    else
+	echo Done.
+    fi
+    rm a.out
+done
+
+echo "Setting up user accounts: "
+sudo chmod 777 /mnt/etc/passwd
+for acct in "${ACCOUNTS[@]}"
+do
+  echo -n " ---> $acct ... "
+  sudo echo $acct >> /mnt/etc/passwd
+  if [ $? -eq 0 ]; then
+    echo Done.
+  fi
+
+  IFS=':' tokens=($acct)
+  echo ${tokens[0]}
+  sudo mkdir "/mnt/user/$tokens"
+  sudo chmod 777 /mnt/user/$tokens
+done
+
+echo -n Unmounting virtual disk ...
+sudo umount /mnt
+if [ $? -ne 0 ]; then
+    echo failed: count not umount the virtual disk.
+else
+    echo Done.
+fi
+
+echo "#!/bin/bash" > cln
+echo >> cln
+echo "rm -rf bin lib" >> cln
+echo "rm q" >> cln
+echo rm $LOG >> cln
+echo "rm cln" >> cln
+chmod +x cln
+
+echo "#!/bin/bash" >> q
+echo >> q
+echo "if [ \$# -gt 0 -a \"\$1\" = \"-serial\" ]; then" >> q
+echo "	 qemu-system-i386 -hda $DISK -smp 2 -serial /dev/pts/1 -serial \\" >> q
+echo "   /dev/pts/2 -parallel /dev/pts/3 -localtime" >> q
+echo "else" >> q
+echo "   qemu-system-i386 -hda $DISK -smp 2 -localtime" >> q
+echo "fi" >> q
+
+chmod +x q

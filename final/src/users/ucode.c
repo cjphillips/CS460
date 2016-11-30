@@ -1,4 +1,4 @@
-#include "include/type.h"
+#include "../include/type.h"
 
 int pid;
 char line[64], pathname[32], i2[32], i3[32];
@@ -139,7 +139,7 @@ int getcwd(char *cwdname)
 }
 
 int stat(char *filename, struct stat *sPtr)
-{   
+{
    return syscall(29, filename, sPtr);
 }
 
