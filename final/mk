@@ -5,12 +5,19 @@ declare -a BINARIES=(
     'init'
     'login'
     'sh'
+    'cat'
 )
 
 declare -a ACCOUNTS=(
     'colin:scout:4:4:Colin Phillips:/user/colin:sh'
     'savannah:peridot:5:4:Savannah Voorheis:/user/savannah:sh'
     'steve:hargett:6:5:Steve Hargett:/user/steve:sh'
+)
+
+declare -a HOMEDIRS=(
+	'colin'
+	'savannah'
+	'steve'
 )
 
 LOG='log.txt'
@@ -120,12 +127,15 @@ do
   if [ $? -eq 0 ]; then
     echo Done.
   fi
-
-  IFS=':' tokens=($acct)
-  echo ${tokens[0]}
-  sudo mkdir "/mnt/user/$tokens"
-  sudo chmod 777 /mnt/user/$tokens
 done
+
+for dir in "${HOMEDIRS[@]}"
+do
+  sudo mkdir "/mnt/user/$dir"
+  sudo chmod 777 /mnt/user/$dir
+done
+
+cat clean/largefile >> /mnt/user/colin/file1
 
 echo -n Unmounting virtual disk ...
 sudo umount /mnt

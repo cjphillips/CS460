@@ -1,12 +1,12 @@
 #define NAME_LENGTH  256
 #define BUF_SIZE    1024
 
-char *cmds[] = { "pwd", "exit" };
+char *cmds[] = { "pwd", "exit", "cat" };
 
 int menu()
 {
   printf("<<-----------------------------------------------Menu--->>\n");
-  printf(" pwd exit \n");
+  printf(" pwd cat exit \n");
   printf("----------------------------------------------------------\n");
 }
 
@@ -36,4 +36,24 @@ int _pwd()
 int _exit()
 {
   exit(1);
+}
+
+int _exec(char *cmd, char *argv[], char *line)
+{
+  int pid, status;
+
+  if ((pid = fork()) < 0)
+  {
+    printf("Could not fork process for \"cat\" command.\n");
+    return -1;
+  }
+
+  if (pid)
+  {
+    pid = wait(&status);
+  }
+  else
+  {
+    exec(line);
+  }
 }
