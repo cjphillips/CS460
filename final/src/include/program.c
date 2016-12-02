@@ -38,7 +38,7 @@ int _exit()
   exit(1);
 }
 
-int _exec(char *cmd, char *argv[], char *line)
+int _exec(char *line)
 {
   int pid, status;
 

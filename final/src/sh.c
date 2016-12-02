@@ -4,12 +4,17 @@
 char *user, *home, *command, input[NAME_LENGTH], cwd[NAME_LENGTH];
 int uid, gid;
 
-int handleCommand(char *cmd, char *args[]);
+int handle(char *line, int *pd);
+
+int run(char *line);
+
+int scan(char *line, char *head, char *tail);
+
 
 int main(int argc, char *argv[])
 {
   int i, argcount;
-  char *token, *command, args[64][NAME_LENGTH], input[NAME_LENGTH], linefull[NAME_LENGTH];
+  char linefull[NAME_LENGTH];
   user = argv[1];
   uid = atoi(argv[2]);
   gid = atoi(argv[3]);
@@ -26,30 +31,74 @@ int main(int argc, char *argv[])
   {
     getcwd(cwd);
     printf("%s [%s] $ ", user, cwd);
+
     gets(input);
-
-    strcpy(linefull, input);
-    command = strtok(input, " ");
-
-    i = argcount = 0;
-    token = strtok(0, " ");
-    while(token)
-    {
-      strcpy(args[i++], token);
-      //strcpy(out[i], token);
-      token = strtok(0, " ");
-      argcount++;
-    }
-
-    handleCommand(command, args, linefull);
+    handle(input);
   }
 
   return 0;
 }
 
-int handleCommand(char *cmd, char *args[], char *input)
+int handle(char *line, int *pd)
 {
-  int handle = findcmd(cmd);
+  char orig[NAME_LENGTH], head[NAME_LENGTH], tail[NAME_LENGTH];
+  int haspipe, lpd[2], pid;
+
+  if (pd)
+  {
+    /* A pipe has been passed in */
+    close(pd[0]);
+    dup2(pd[1], 1);
+    close(pd[1]);
+  }
+
+  strcpy(orig, line);
+  haspipe = scan(line, head, tail);
+
+  if (haspipe)
+  {
+    pipe(lpd);
+    pid = fork();
+    if (pid)
+    {
+      /* parent reads */
+      close(lpd[1]);
+      dup2(lpd[0], 0);
+      close(lpd[0]);
+      run(tail);
+    }
+    else
+    {
+      /* Child writes. There may be more piping involved! */
+      handle(head, lpd);
+    }
+  }
+  else
+  {
+    run(orig);
+  }
+}
+
+int run(char *line)
+{
+  char *token, *command, orig[NAME_LENGTH], args[64][NAME_LENGTH];
+  int i, argcount, handle;
+
+  strcpy(orig, line);
+
+  command = strtok(line, " ");
+
+  i = argcount = 0;
+  token = strtok(0, " ");
+  while(token)
+  {
+    strcpy(args[i++], token);
+    //strcpy(out[i], token);
+    token = strtok(0, " ");
+    argcount++;
+  }
+
+  handle = findcmd(command);
 
   /*if (handle < 0)
   {
@@ -61,7 +110,47 @@ int handleCommand(char *cmd, char *args[], char *input)
     {
       case 0:  _pwd();       break;
       case 1:  _exit();      break;
-      default: _exec(cmd, args, input);  break;
+      default: _exec(orig);  break;
     }
   }
+}
+
+int scan(char *line, char *head, char *tail)
+{
+  int i, pipe_index = -1;
+  for(i = 0; line[i]; i++)
+  {
+    if (line[i] == '|')
+    {
+      /* Get the right-most pipe (|) index */
+      pipe_index = i;
+    }
+  }
+
+  if (pipe_index < 0)
+  {
+    head = line;
+    tail = 0;
+  }
+  else
+  {
+    for(i = 0; i < pipe_index; i++)
+    {
+      head[i] = line[i];
+    }
+
+    i = (head[i] == ' ') ? i - 1 : i;
+    head[i] = 0; /* trim the end */
+
+    pipe_index++;
+    if (line[pipe_index] == ' ') pipe_index++; /* trim the beginning */
+
+    for(; line[i]; i++)
+    {
+      tail[i - pipe_index] = line[i];
+    }
+    tail[i - pipe_index] = 0;
+  }
+
+  return tail ? 1 : 0;
 }

@@ -6,6 +6,10 @@ declare -a BINARIES=(
     'login'
     'sh'
     'cat'
+		'l2u'
+		'u2l'
+		'more'
+    'grep'
 )
 
 declare -a ACCOUNTS=(
@@ -136,6 +140,7 @@ do
 done
 
 cat clean/largefile >> /mnt/user/colin/file1
+cat clean/greptest >> /mnt/user/colin/greptest
 
 echo -n Unmounting virtual disk ...
 sudo umount /mnt

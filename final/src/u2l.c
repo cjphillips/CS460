@@ -58,9 +58,9 @@ void read_stdin(int gd)
   {
     buf[i] = *cp;
 
-    if (buf[i] >= 97 && buf[i] <= 122)
+    if (buf[i] >= 65 && buf[i] <= 90)
     {
-      buf[i] = (char)(buf[i] - 0x20);
+      buf[i] = (char)(buf[i] + 0x20);
     }
     i++;
     putc(*cp);
@@ -100,9 +100,9 @@ void read_file(int fd, int gd)
       }
       else
       {
-        if (*cp >= 97 && *cp <= 122)
+        if (*cp >= 65 && *cp <= 90)
         {
-          *cp = (char)(*cp - 0x20);
+          *cp = (char)(*cp + 0x20);
         }
 
         gd == 1 ? putc(*cp) : write(gd, *cp, 1);
