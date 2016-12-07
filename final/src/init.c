@@ -28,16 +28,11 @@ int parent()
     int pid, status;
     while(1)
     {
-        printf("[CJP_INIT]: waiting ..... \n");
-
         pid = wait(&status);
 
         if (pid == child)
         {
-            printf("[CJP_INIT]: Found child [%d].\n");
-
             child = fork();
-            printf("[CJP_INIT]: Forked child [%d].\n");
 
             if (child)
             {
@@ -48,7 +43,5 @@ int parent()
               exec("login /dev/tty0");
             }
         }
-
-        printf("[CJP_INIT]: Found child [%d].\n");
     }
 }

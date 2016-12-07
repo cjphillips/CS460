@@ -92,32 +92,32 @@ do
     echo -n "Compiling $exe.c ... "
     as86 -o bin/u.o src/users/u.s &>> $LOG
     if [ $? -ne 0 ]; then
-	echo Error: see $LOG
-	exit
+			echo Error: see $LOG
+			exit
     fi
 
     bcc -c -ansi -o bin/$exe.o src/$exe.c &>> $LOG
     if [ $? -ne 0 ]; then
-	echo Error: see $LOG
-	exit
+			echo Error: see $LOG
+			exit
     fi
     echo Done.
 
-    echo -n "Linking to compiled targets ... "
+    echo -n " ... Linking to compiled targets ... "
     ld86 bin/u.o bin/$exe.o $LIB $BCCLIB &>> $LOG
     if [ $? -ne 0 ]; then
-	echo Error: see $LOG
-	exit
+			echo Error: see $LOG
+			exit
     fi
     echo Done.
 
-    echo -n "Dumping \"$exe\" into the vitrual disk at /bin/$exe ... "
+    echo -n " ... Dumping \"$exe\" into the vitrual disk at /bin/$exe ... "
     sudo cp -av a.out /mnt/bin/$exe &>> $LOG
     if [ $? -ne 0 ]; then
-	echo Error: see $LOG
-	exit
+			echo Error: see $LOG
+			exit
     else
-	echo Done.
+			echo Done.
     fi
     rm a.out
 done

@@ -43,8 +43,8 @@ int main(int argc, char *argv[])
 
   fd == 0 ? read_stdin(gd) : read_file(fd, gd);
 
-  close(fd);
-  close(gd);
+  if (fd)  close(fd);
+  if (gd)  close(gd);
 
   return 0;
 }

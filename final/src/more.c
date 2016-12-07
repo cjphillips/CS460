@@ -32,7 +32,6 @@ int main(int argc, char *argv[])
 
   /* print an initial page */
   r = print_page(fd);
-
   /* while there is still more to read, ask for commands */
   while(r > 0)
   {
@@ -43,6 +42,8 @@ int main(int argc, char *argv[])
       case 'q':
         putc('\n');
         r = -1;
+        break;
+      case '\n':
       case '\r':
         r = print_line(fd);
         break;
@@ -54,7 +55,10 @@ int main(int argc, char *argv[])
     }
   }
 
-  close(fd);
+  if (fd)
+  {
+      close(fd);
+  }
 
   return 0;
 }
@@ -66,16 +70,17 @@ int print_page(int fd)
 
   while((r = read(fd, cp, 1)) > 0)
   {
-    if (row >= LINES)
-    {
-      break;
-    }
     if (*cp == '\n')
     {
       row++;
     }
 
     putc(*cp);
+
+    if (row >= LINES)
+    {
+      break;
+    }
   }
 
   if (r <= 0)

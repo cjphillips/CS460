@@ -1,7 +1,9 @@
 #include "users/ucode.c"
 #include "include/type.h"
 
-int check_pattern(char *str);
+int check_pattern(char *line, char *pattern);
+
+int get_line(int fd, char *buf, int count);
 
 int main(int argc, char *argv[])
 {
@@ -29,22 +31,9 @@ int main(int argc, char *argv[])
   }
 
   i = 0;
-  while((r = read(fd, cp, 1)) > 0)
+  while((r = get_line(fd, line, NAME_LENGTH)) > 0)
   {
-    line[i++] = *cp;
-
-    if (*cp == '\n')
-    {
-      /* An entire line has been read, check it for the pattern */
-      line[i-1] = 0;
-      check_pattern(line, argv[1]);
-
-      for(i = 0; i < NAME_LENGTH; i++)
-      {
-        line[i] = 0;
-      }
-      i = 0;
-    }
+    check_pattern(line, argv[1]);
   }
 
   if (i > 0)
@@ -61,6 +50,8 @@ int check_pattern(char *line, char *pattern)
 {
   char *token, pieces[NAME_LENGTH][64], orig[NAME_LENGTH];
   int count = 0, i;
+
+  //printf("LINE: %s\n", line);
 
   strcpy(orig, line);
 
@@ -84,4 +75,27 @@ int check_pattern(char *line, char *pattern)
   }
 
   return 0;
+}
+
+int get_line(int fd, char *buf, int count)
+{
+  int i = 0, r, total = 0;
+  char *cp;
+
+  while((r = read(fd, cp, 1)) > 0)
+  {
+    total++;
+
+    if (*cp == '\n')
+    {
+      break;
+    }
+
+    buf[i] = *cp;
+    i++;
+  }
+
+  buf[i] = 0;
+
+  return i;
 }

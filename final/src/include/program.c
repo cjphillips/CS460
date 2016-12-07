@@ -41,7 +41,6 @@ int _exit()
 int _exec(char *line)
 {
   int pid, status;
-
   if ((pid = fork()) < 0)
   {
     printf("Could not fork process for \"cat\" command.\n");
