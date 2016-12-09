@@ -10,6 +10,7 @@ declare -a BINARIES=(
 		'u2l'
 		'more'
     'grep'
+		'cp'
 )
 
 declare -a ACCOUNTS=(

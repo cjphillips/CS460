@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     return -2;
   }
 
-  if ((gd = open(argv[2], WRONLY)) < 0)
+  if ((gd = open(argv[2], WRONLY | O_CREAT | O_TRUNC)) < 0)
   {
     printf("Could not open \"%s\".", argv[2]);
     return -3;

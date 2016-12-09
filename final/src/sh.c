@@ -38,6 +38,11 @@ int main(int argc, char *argv[])
 
     gets(input);
 
+    if (strcmp(input, "exit") == 0)
+    {
+      _exit();
+    }
+
     if (strlen(input) > 0)
     {
       pid = fork();
@@ -150,12 +155,14 @@ int redirect(char *file, int type)
       open(file, O_RDONLY);
       break;
     case 2: /* '>' ... redirect output */
+      printf("WRITE NO APPEND\n");
       close(1);
       open(file, O_WRONLY | O_CREAT, 0777);
       break;
     case 3: /* '>>' ... redirect output with appending */
+      printf("APPENDING!\n");
       close(1);
-      open(file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
+      open(file, O_WRONLY | O_CREAT | O_APPEND, 0777);
       break;
     default:
       printf("Unrecognized redirect symbol in command line.\n");

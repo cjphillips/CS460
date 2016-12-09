@@ -1,22 +1,29 @@
 #include "users/ucode.c"
 #include "include/type.h"
 
-int read_file(int fd);
-
-int read_cat(int fd);
-
 int get_line(int fd, char *buf, int count);
+
+int get_input_redirected(char *tty);
+
+int get_output_redirected(char *tty);
+
+int o_redir, i_redir;
 
 int main(int argc, char *argv[])
 {
-  char *cp, buf[NAME_LENGTH];
+  char *cp, buf[NAME_LENGTH], tty[64];
   int fd = 0, r;
 
   /* If a file has been given, open that file
      If no file name was given, read from stdin */
 
+  gettty(tty);
+
+    //printf("HERE\n\n");
+
   if (argc > 1)
   {
+    //printf("HERE! argv[1] = %s\n", argv[1]);
     fd = open(argv[1], O_RDONLY);
   }
   else
@@ -29,30 +36,27 @@ int main(int argc, char *argv[])
     printf("\"%s\": could not open file.\n", argv[1]);
     return -1;
   }
-/*
-  while((r = read(fd, cp, 1)) > 0)
-  {
-    write(1, cp, 1);
+  //printf("fd = %d\n", fd);
 
-    if (*cp == '\r')
-    {
-      printf("HER\n");
-      write(1, '\n', 1);
-    }
+  //remove_carriage = get_input_redirected(tty);
+  i_redir = get_input_redirected(tty);
+  o_redir = get_output_redirected(tty);
+  //printf("ir = %d or = %d fd = %d\n", i_redir, o_redir, fd);
 
-    if(*cp == '\n')
-    {
-      write(1, '\r', 1);
-    }
-  }*/
+
+  //printf("\necho = %d remove_carriage = %d fd = %d\n", echo, remove_carriage, fd);
 
   while ((r = get_line(fd, buf, NAME_LENGTH)) > 0)
   {
-    //putc('\r');
-    //putc('\n');
     write(1, buf, r);
   }
+    //printf("ir = %d or = %d fd = %d\n", i_redir, o_redir, fd);
 
+    //printf("\necho = %d remove_carriage = %d fd = %d\n", echo, remove_carriage, fd);
+  //get_input_redirected(tty);
+  //get_output_redirected(tty);
+  //printf("tty = %s\n", tty);
+  //printf("\nremove_carriage = %d", remove_carriage);
   close(fd);
 
   return 0;
@@ -60,32 +64,44 @@ int main(int argc, char *argv[])
 
 int get_line(int fd, char *buf, int count)
 {
-  int i = 0, r, total = 0;
-  char *cp;
+  int i = 0, r;
+  char *cp, end_line;
+
+  end_line = i_redir ? '\n' : '\r';
+  if (fd)
+  {
+    end_line = '\n';
+  }
 
   while((r = read(fd, cp, 1)) > 0)
   {
-    total++;
-    //if (!fd)
-    //{
-    //  putc(*cp);
-    //}
-
-    if (*cp == '\n')
+    if (*cp == end_line)
     {
-      //if (!fd)
-      //{
-      //  putc('\n');
-      //}
-      buf[i++] = '\n';
-      buf[i++] = '\r';
+      if (!i_redir && !fd)
+      {
+        //printf("HERE2\n");
+        putc(*cp);
+        putc('\n');
+      }
 
-      total++;
+      if (!o_redir)
+      {
+        buf[i++] = '\r';
+      }
+
+      buf[i++] = '\n';
+
       break;
     }
+    else
+    {
+      if (!i_redir && !fd)
+      {
+        putc(*cp);
+      }
+    }
 
-    buf[i] = *cp;
-    i++;
+    buf[i++] = *cp;
   }
 
   buf[i] = 0;
@@ -93,106 +109,48 @@ int get_line(int fd, char *buf, int count)
   return i;
 }
 
-int get_line_file(int fd, char *buf, int count)
+int get_input_redirected(char *tty)
 {
-  char *cp, buf[NAME_LENGTH];
-  int i = 0, r, count;
+  struct stat st_tty;
+  struct stat file_s;
 
-  printf("reading file!\n");
+  stat(tty, &st_tty);
+  fstat(0, &file_s);
 
-  while(1)
-  //while((r = read(fd, cp, 1)) > 0)
+  //printf("INPUT;\n");
+  //printf("st_tty.st_dev = %d\n", st_tty.st_dev);
+  //printf("st_tty.st_ino = %d\n", st_tty.st_ino);
+  //printf("file_s.st_dev = %d\n", file_s.st_dev);
+  //printf("file_s.st_ino = %d\n", file_s.st_ino);
+
+  if (st_tty.st_dev != file_s.st_dev &&
+      st_tty.st_ino != file_s.st_ino)
   {
-    gets(cp);
-    count += 1;
-    buf[i++] = *cp;
-
-    if (*cp == '\r')
-    {
-      buf[i] = 0;
-      i = 0;
-      while(i < count)
-      {
-        putc(buf[i++]);
-      }
-      putc('\n');
-      count = 0;
-    }
+    return 1;
   }
 
-  return r;
+  return 0;
 }
 
-int read_file(int fd)
+int get_output_redirected(char *tty)
 {
-  char *cp, buf[NAME_LENGTH];
-  int i = 0, r, count;
+  struct stat st_tty;
+  struct stat file_s;
 
-  printf("reading file!\n");
+  stat(tty, &st_tty);
+  fstat(1, &file_s);
 
-  while((r = read(fd, cp, 1)) > 0)
+  //printf("OUTPUT;\n");
+  //printf("st_tty.st_dev = %d\n", st_tty.st_dev);
+  //printf("st_tty.st_ino = %d\n", st_tty.st_ino);
+  //printf("file_s.st_dev = %d\n", file_s.st_dev);
+  //printf("file_s.st_ino = %d\n", file_s.st_ino);
+
+  if (st_tty.st_dev != file_s.st_dev &&
+      st_tty.st_ino != file_s.st_ino)
   {
-    count += r;
-    buf[i++] = *cp;
-
-    if (*cp == '\r')
-    {
-      buf[i] = 0;
-      i = 0;
-      while(i < count)
-      {
-        putc(buf[i++]);
-      }
-      putc('\n');
-      count = 0;
-    }
-    /*
-    while(*cp)
-    {/*
-      if (*cp == '\r')
-      {
-        putc('\n');
-      }
-      else
-      {
-        putc(*cp);
-      }
-      putc(*cp);
-      *cp++;
-    }
-
-    for(i = 0; i < NAME_LENGTH; i++)
-    {
-      buf[i] = 0;
-    }*/
+    return 1;
   }
 
-  return r;
-}
-
-int read_cat(int fd)
-{
-  char *cp, buf[NAME_LENGTH];
-  int i = 0, r;
-
-  while((r = read(fd, cp, 1)) > 0)
-  {
-    buf[i++] = *cp;
-    putc(*cp);
-    if (*cp == '\r')
-    {
-      buf[i] = 0;
-      putc('\n');
-      printf("%s\n", buf);
-
-      for(i = 0; i < NAME_LENGTH; i++)
-      {
-        buf[i] = 0;
-      }
-
-      i = 0;
-    }
-  }
-
-  return r;
+  return 0;
 }
