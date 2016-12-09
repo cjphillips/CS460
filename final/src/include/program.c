@@ -1,7 +1,7 @@
 #define NAME_LENGTH  256
 #define BUF_SIZE    1024
 
-char *cmds[] = { "pwd", "exit", "cat" };
+char *cmds[] = { "pwd", "cd", "exit" };
 
 int menu()
 {
@@ -13,9 +13,17 @@ int menu()
 int findcmd(char *command)
 {
   int i = 0;
+  char buf[NAME_LENGTH];
+
+  for(i = 0; command[i] && command[i] != ' '; i++)
+  {
+    buf[i] = command[i];
+  }
+  buf[i] = 0;
+
   for(i = 0; cmds[i] != 0; i++)
   {
-    if (strcmp(command, cmds[i]) == 0)
+    if (strcmp(buf, cmds[i]) == 0)
     {
       return i;
     }
@@ -33,9 +41,29 @@ int _pwd()
   return 0;
 }
 
-int _exit()
+int _cd(char *line, char *home)
 {
-  exit(1);
+  int i = 0;
+  char dir[NAME_LENGTH];
+  while(*line++ != ' ');
+
+  while(*line && *line != ' ')
+  {
+    dir[i++] = *line++;
+  }
+  dir[i] = 0;
+
+  if (dir && strlen(dir))
+  {
+    if (chdir(dir) < 0)
+    {
+      printf("\"%s\": not a valid directory.\n", dir);
+    }
+  }
+  else
+  {
+    chdir(home);
+  }
 }
 
 int _exec(char *line)

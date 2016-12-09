@@ -3,9 +3,9 @@
 
 int get_line(int fd, char *buf, int count);
 
-int get_input_redirected(char *tty);
+int get_is_input_redirected(char *tty);
 
-int get_output_redirected(char *tty);
+int get_is_output_redirected(char *tty);
 
 int o_redir, i_redir;
 
@@ -39,8 +39,8 @@ int main(int argc, char *argv[])
   //printf("fd = %d\n", fd);
 
   //remove_carriage = get_input_redirected(tty);
-  i_redir = get_input_redirected(tty);
-  o_redir = get_output_redirected(tty);
+  i_redir = get_is_input_redirected(tty);
+  o_redir = get_is_output_redirected(tty);
   //printf("ir = %d or = %d fd = %d\n", i_redir, o_redir, fd);
 
 
@@ -59,6 +59,10 @@ int main(int argc, char *argv[])
   //printf("\nremove_carriage = %d", remove_carriage);
   close(fd);
 
+  //printf("i_red = %d o_red = %d\n", i_redir, o_redir);
+  //get_is_input_redirected(tty);
+  //get_is_output_redirected(tty);
+
   return 0;
 }
 
@@ -67,7 +71,7 @@ int get_line(int fd, char *buf, int count)
   int i = 0, r;
   char *cp, end_line;
 
-  end_line = i_redir ? '\n' : '\r';
+  end_line = o_redir ? '\n' : '\r';
   if (fd)
   {
     end_line = '\n';
@@ -75,31 +79,52 @@ int get_line(int fd, char *buf, int count)
 
   while((r = read(fd, cp, 1)) > 0)
   {
+    if (fd)
+    {
+      if (*cp == '\n')
+      {
+        buf[i++] = '\n';
+
+        if (!o_redir)
+        {
+          buf[i++] = '\r';
+        }
+
+        break;
+      }
+    }
+    else
+    {
+      if (*cp == '\r')
+      {
+        if (!i_redir)
+        {
+          putc('\r');
+          putc('\n');
+          buf[i++] = '\r';
+        }
+
+        buf[i++] = '\n';
+        break;
+      }
+
+      putc(*cp);
+    }
+/*
     if (*cp == end_line)
     {
       if (!i_redir && !fd)
       {
-        //printf("HERE2\n");
-        putc(*cp);
+        printf("HERE!\n");
+        putc('\r');
         putc('\n');
-      }
-
-      if (!o_redir)
-      {
-        buf[i++] = '\r';
+        buf[i++]  = '\r';
       }
 
       buf[i++] = '\n';
 
       break;
-    }
-    else
-    {
-      if (!i_redir && !fd)
-      {
-        putc(*cp);
-      }
-    }
+    }*/
 
     buf[i++] = *cp;
   }
@@ -109,22 +134,21 @@ int get_line(int fd, char *buf, int count)
   return i;
 }
 
-int get_input_redirected(char *tty)
+int get_is_input_redirected(char *tty)
 {
   struct stat st_tty;
-  struct stat file_s;
+  struct stat file_s0;
 
   stat(tty, &st_tty);
-  fstat(0, &file_s);
+  fstat(0, &file_s0);
 
-  //printf("INPUT;\n");
-  //printf("st_tty.st_dev = %d\n", st_tty.st_dev);
   //printf("st_tty.st_ino = %d\n", st_tty.st_ino);
-  //printf("file_s.st_dev = %d\n", file_s.st_dev);
-  //printf("file_s.st_ino = %d\n", file_s.st_ino);
+  //printf("file_s0.st_ino = %d\n", file_s0.st_ino);
+  //printf("st_tty.st_dev = %d\n", st_tty.st_dev);
+  //printf("file_s0.st_dev = %d\n", file_s0.st_dev);
 
-  if (st_tty.st_dev != file_s.st_dev &&
-      st_tty.st_ino != file_s.st_ino)
+  if (st_tty.st_dev != file_s0.st_dev ||
+      st_tty.st_ino != file_s0.st_ino)
   {
     return 1;
   }
@@ -132,22 +156,21 @@ int get_input_redirected(char *tty)
   return 0;
 }
 
-int get_output_redirected(char *tty)
+int get_is_output_redirected(char *tty)
 {
   struct stat st_tty;
-  struct stat file_s;
+  struct stat file_s1;
 
   stat(tty, &st_tty);
-  fstat(1, &file_s);
+  fstat(1, &file_s1);
 
-  //printf("OUTPUT;\n");
-  //printf("st_tty.st_dev = %d\n", st_tty.st_dev);
   //printf("st_tty.st_ino = %d\n", st_tty.st_ino);
-  //printf("file_s.st_dev = %d\n", file_s.st_dev);
-  //printf("file_s.st_ino = %d\n", file_s.st_ino);
+  //printf("file_s1.st_ino = %d\n", file_s1.st_ino);
+  //printf("st_tty.st_dev = %d\n", st_tty.st_dev);
+  //printf("file_s1.st_dev = %d\n", file_s1.st_dev);
 
-  if (st_tty.st_dev != file_s.st_dev &&
-      st_tty.st_ino != file_s.st_ino)
+  if (st_tty.st_dev != file_s1.st_dev ||
+      st_tty.st_ino != file_s1.st_ino)
   {
     return 1;
   }

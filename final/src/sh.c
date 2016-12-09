@@ -38,22 +38,28 @@ int main(int argc, char *argv[])
 
     gets(input);
 
-    if (strcmp(input, "exit") == 0)
-    {
-      _exit();
-    }
-
     if (strlen(input) > 0)
     {
-      pid = fork();
-
-      if (pid)
+      if (strcmp(input, "exit") == 0)
       {
-        pid = wait(&status);
+        exit(0);
+      }
+      else if (input[0] == 'c' && input[1] == 'd')
+      {
+        _cd(input, home);
       }
       else
       {
-        handle(input, 0);
+        pid = fork();
+
+        if (pid)
+        {
+          pid = wait(&status);
+        }
+        else
+        {
+          handle(input, 0);
+        }
       }
     }
   }
@@ -123,7 +129,7 @@ int run(char *line)
     switch(handle)
     {
       case 0:  _pwd();       break;
-      case 1:  _exit();      break;
+      case 1:  _cd(line, home);    break;
       default: exec(bin);  break;
     }
   }
@@ -155,12 +161,10 @@ int redirect(char *file, int type)
       open(file, O_RDONLY);
       break;
     case 2: /* '>' ... redirect output */
-      printf("WRITE NO APPEND\n");
       close(1);
       open(file, O_WRONLY | O_CREAT, 0777);
       break;
     case 3: /* '>>' ... redirect output with appending */
-      printf("APPENDING!\n");
       close(1);
       open(file, O_WRONLY | O_CREAT | O_APPEND, 0777);
       break;
