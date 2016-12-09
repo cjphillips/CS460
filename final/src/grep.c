@@ -1,14 +1,17 @@
 #include "users/ucode.c"
+#include "include/util.c"
 #include "include/type.h"
 
 int check_pattern(char *line, char *pattern);
 
-int get_line(int fd, char *buf, int count);
+//int get_line(int fd, char *buf, int count);
+
+int i_redir, o_redir;
 
 int main(int argc, char *argv[])
 {
   int fd, i, r;
-  char line[NAME_LENGTH], *cp;
+  char line[NAME_LENGTH], *cp, tty[64];
 
   if (argc > 2)
   {
@@ -30,8 +33,13 @@ int main(int argc, char *argv[])
     return -1;
   }
 
+  gettty(tty);
+
+  i_redir = get_is_input_redirected(tty);
+  o_redir = get_is_output_redirected(tty);
+
   i = 0;
-  while((r = get_line(fd, line, NAME_LENGTH)) > 0)
+  while((r = get_line(fd, line, NAME_LENGTH, i_redir, o_redir)) > 0)
   {
     check_pattern(line, argv[1]);
   }
@@ -51,7 +59,15 @@ int check_pattern(char *line, char *pattern)
   char *token, pieces[NAME_LENGTH][64], orig[NAME_LENGTH];
   int count = 0, i;
 
-  //printf("LINE: %s\n", line);
+  while(line[i])
+  {
+    if (line[i] == '\r' || line[i] == '\n')
+    {
+      line[i] = 0;
+      break;
+    }
+    i++;
+  }
 
   strcpy(orig, line);
 
@@ -76,7 +92,7 @@ int check_pattern(char *line, char *pattern)
 
   return 0;
 }
-
+/*
 int get_line(int fd, char *buf, int count)
 {
   int i = 0, r, total = 0;
@@ -98,4 +114,4 @@ int get_line(int fd, char *buf, int count)
   buf[i] = 0;
 
   return i;
-}
+}*/

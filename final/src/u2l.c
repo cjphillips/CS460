@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
     }
   }
 
-  if (fd)  close(fd);
-  if (gd)  close(gd);
+  close(fd);
+  close(gd);
 
   return 0;
 }

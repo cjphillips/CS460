@@ -25,8 +25,8 @@ int get_line(int fd, char *buf, int i_redir, int o_redir)
       {
         if (!i_redir)
         {
-          putc('\r');
-          putc('\n');
+          write(2, "\r", 1);
+          write(2, "\n", 1);
         }
 
         if (!o_redir)
@@ -40,7 +40,7 @@ int get_line(int fd, char *buf, int i_redir, int o_redir)
 
       if (!i_redir)
       {
-        putc(*cp);
+        write(2, cp, 1);
       }
     }
 
@@ -60,11 +60,6 @@ int get_is_input_redirected(char *tty)
   stat(tty, &st_tty);
   fstat(0, &file_s0);
 
-  //printf("st_tty.st_ino = %d\n", st_tty.st_ino);
-  //printf("file_s0.st_ino = %d\n", file_s0.st_ino);
-  //printf("st_tty.st_dev = %d\n", st_tty.st_dev);
-  //printf("file_s0.st_dev = %d\n", file_s0.st_dev);
-
   if (st_tty.st_dev != file_s0.st_dev ||
       st_tty.st_ino != file_s0.st_ino)
   {
@@ -81,11 +76,6 @@ int get_is_output_redirected(char *tty)
 
   stat(tty, &st_tty);
   fstat(1, &file_s1);
-
-  //printf("st_tty.st_ino = %d\n", st_tty.st_ino);
-  //printf("file_s1.st_ino = %d\n", file_s1.st_ino);
-  //printf("st_tty.st_dev = %d\n", st_tty.st_dev);
-  //printf("file_s1.st_dev = %d\n", file_s1.st_dev);
 
   if (st_tty.st_dev != file_s1.st_dev ||
       st_tty.st_ino != file_s1.st_ino)

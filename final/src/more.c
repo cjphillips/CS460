@@ -55,10 +55,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  if (fd)
-  {
-      close(fd);
-  }
+  close(fd);
 
   return 0;
 }
