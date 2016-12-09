@@ -120,36 +120,12 @@ int run(char *line)
 
   handle = findcmd(bin);
 
-  /*if (handle < 0)
+  switch(handle)
   {
-    printf("Invalid input: \"%s\" not found.\n", cmd);
-  }*/
-  //else
-  {
-    switch(handle)
-    {
-      case 0:  _pwd();       break;
-      case 1:  _cd(line, home);    break;
-      default: exec(bin);  break;
-    }
+    case 0:  _pwd();       break;
+    case 1:  _cd(line, home);    break;
+    default: exec(bin);  break;
   }
-}
-
-int save()
-{/*
-  command = strtok(line, " ");
-
-  i = argcount = 0;
-  token = strtok(0, " ");
-  while(token)
-  {
-    strcpy(args[i++], token);
-    //strcpy(out[i], token);
-    token = strtok(0, " ");
-    argcount++;
-  }
-
-  printf("In run: command = %s\n", command);*/
 }
 
 int redirect(char *file, int type)
